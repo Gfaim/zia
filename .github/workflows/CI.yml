@@ -87,7 +87,7 @@ jobs:
           conan config set general.revisions_enabled=1
 
       - name: Set C++ Standard
-        run: conan profile update settings.compiler.libcxx=${{ matrix.conan-cxx-version }} default
+        run: conan profile update settings.compiler.libcxx=libstdc++11 default
 
       - name: Install Tests Dependencies with Conan
         run: conan install . -if build_tests --build=missing
