@@ -53,7 +53,7 @@ TEST(yaml_parser, operator_key)
 {
     Node node = ParseYAML("str: ouah");
 
-    EXPECT_EQ(node.AsString(), std::string("ouah"));
+    EXPECT_EQ(node["str"].AsString(), std::string("ouah"));
 }
 
 TEST(yaml_parser, operator_index)

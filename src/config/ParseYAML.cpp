@@ -75,7 +75,7 @@ Node ParseYAML(const std::string &content)
 
 Node ParseYAMLFromFile(const std::filesystem::path &file)
 {
-    YAML::Node node = YAML::LoadFile(file.c_str());
+    YAML::Node node = YAML::LoadFile(file.string());
 
     return YAMLToNode(node);
 }
