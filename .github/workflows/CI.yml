@@ -64,3 +64,39 @@ jobs:
 
       - name: Run Unit Tests
         run: ${{ matrix.dir }}${{ matrix.bin }}
+
+  memory_check:
+    name: memory check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+
+      - name: Update Packages
+        run: sudo apt update
+
+      - name: Install Valgrind
+        run: sudo apt install -y valgrind
+
+      - name: Install & Setup Conan
+        run: |
+          pip install conan
+          conan profile new default --detect
+          conan remote add bincrafters https://bincrafters.jfrog.io/artifactory/api/conan/public-conan
+          conan config set general.revisions_enabled=1
+
+      - name: Set C++ Standard
+        run: conan profile update settings.compiler.libcxx=${{ matrix.conan-cxx-version }} default
+
+      - name: Install Tests Dependencies with Conan
+        run: conan install . -if build_tests --build=missing
+
+      - name: Generate Tests Build File
+        run: cmake . -B build_tests -DUNIT_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build Unit Tests
+        run: cmake --build build_tests
+
+      - name: Run Unit Tests
+        run: valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 ./unit_tests

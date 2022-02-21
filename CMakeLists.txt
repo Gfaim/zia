@@ -103,7 +103,7 @@ ExternalProject_Add(
     libyaml-cpp
     GIT_REPOSITORY  https://github.com/jbeder/yaml-cpp
     GIT_TAG         yaml-cpp-0.7.0
-    BUILD_COMMAND   ${CMAKE_COMMAND} -DYAML_BUILD_SHARED_LIBS=ON -DYAML_CPP_BUILD_TESTS=OFF .
+    BUILD_COMMAND   ${CMAKE_COMMAND} -DYAML_CPP_BUILD_TESTS=OFF .
     COMMAND         ${CMAKE_COMMAND} --build .
     INSTALL_COMMAND ""
     TEST_COMMAND    ""
@@ -121,10 +121,10 @@ add_dependencies(${BIN} libyaml-cpp)
 add_dependencies(${BIN} ziapi)
 add_dependencies(${BIN} cxxopt)
 
-ExternalProject_Get_Property(libyaml-cpp install_dir)
-include_directories(${install_dir}/src/libyaml-cpp/include)
-target_link_directories(${BIN} PRIVATE ${install_dir}/src/libyaml-cpp-build)
-target_link_libraries(${BIN} PRIVATE yaml-cpp)
+ExternalProject_Get_Property(libyaml-cpp INSTALL_DIR)
+include_directories(${INSTALL_DIR}/src/libyaml-cpp/include)
+target_link_directories(${BIN} PUBLIC ${INSTALL_DIR}/src/libyaml-cpp-build)
+target_link_libraries(${BIN} PUBLIC yaml-cpp)
 
 ExternalProject_Get_Property(cxxopt SOURCE_DIR)
 include_directories(${SOURCE_DIR}/include)
