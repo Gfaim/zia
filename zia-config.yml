@@ -1,0 +1,8 @@
+modules: 
+  locations:
+    - ./modules
+  config:
+    tls:
+      foo: bar
+    php-cgi:
+      foo: bar

@@ -1,0 +1,13 @@
+[requires]
+asio/1.19.2
+
+[options]
+
+[imports]
+bin, *.dll -> .
+lib, *.so* -> lib
+lib, *.dylib* -> lib
+
+[generators]
+cmake
+cmake_find_package

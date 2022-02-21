@@ -1,0 +1,66 @@
+name: CI
+
+on: [push]
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build_and_test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        include:
+          - os: windows-latest
+            bin: unit_tests.exe
+            dir: ./build_tests/bin/
+            conan-cxx-version: libstdc++11
+          - os: ubuntu-latest
+            bin: unit_tests
+            dir: ./
+            conan-cxx-version: libstdc++11
+          - os: macos-latest
+            bin: unit_tests
+            dir: ./
+            conan-cxx-version: libc++
+
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+
+      - name: Install & Setup Conan
+        run: |
+          pip install conan
+          conan profile new default --detect
+          conan remote add bincrafters https://bincrafters.jfrog.io/artifactory/api/conan/public-conan
+          conan config set general.revisions_enabled=1
+
+      - name: Set C++ Standard
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: conan profile update settings.compiler.libcxx=${{ matrix.conan-cxx-version }} default
+
+      - name: Install Build Dependencies with Conan
+        run: conan install . -if build --build=missing
+
+      - name: Generate Build File
+        run: cmake . -B build
+
+      - name: Build Project
+        run: cmake --build build
+
+      - name: Install Tests Dependencies with Conan
+        run: conan install . -if build_tests --build=missing
+
+      - name: Generate Tests Build File
+        run: cmake . -B build_tests -DUNIT_TESTS=ON
+
+      - name: Build Unit Tests
+        run: cmake --build build_tests
+
+      - name: Run Unit Tests
+        run: ${{ matrix.dir }}${{ matrix.bin }}
