@@ -52,7 +52,7 @@ ModuleAggregate ModuleAggregate::From(const std::vector<std::unique_ptr<ziapi::I
 
 ModulePipeline::ModulePipeline(const ziapi::config::Node &cfg,
                                const std::vector<std::unique_ptr<ziapi::IModule>> &modules)
-    : modules_(ModuleAggregate::From(modules)), network_thread_(), requests_({}), responses_({}), should_stop_{false}
+    : modules_(ModuleAggregate::From(modules)), network_thread_(), requests_(), responses_(), should_stop_{false}
 
 {
     for (auto &module : modules) {
