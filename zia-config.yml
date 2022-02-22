@@ -1,7 +1,9 @@
-modules: 
+modules:
   locations:
     - ./modules
   config:
+    directoryListing:
+      root: "./"
     tls:
       foo: bar
     php-cgi:
