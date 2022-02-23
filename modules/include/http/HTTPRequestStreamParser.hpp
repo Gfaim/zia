@@ -23,7 +23,7 @@ public:
     void Clear();
 
 private:
-    const char CRLF[3] = "\r\n";
+    static const inline std::string CRLF = "\r\n";
 
     std::size_t handleNone();
     std::size_t parseMethod();
@@ -40,10 +40,14 @@ private:
     enum RequestState : ushort { NONE, METHOD, TARGET, VERSION, HEADER_KEY, HEADER_VALUE, BODY, DONE, COUNT } _state;
 
     ParseHandler _parsers[RequestState::COUNT] = {
-        HTTPRequestStreamParser::handleNone,     HTTPRequestStreamParser::parseMethod,
-        HTTPRequestStreamParser::parseTarget,    HTTPRequestStreamParser::parseVersion,
-        HTTPRequestStreamParser::parseHeaderKey, HTTPRequestStreamParser::parseHeaderValue,
-        HTTPRequestStreamParser::parseBody,      HTTPRequestStreamParser::parseDone};
+        &HTTPRequestStreamParser::handleNone,     &HTTPRequestStreamParser::parseMethod,
+        &HTTPRequestStreamParser::parseTarget,    &HTTPRequestStreamParser::parseVersion,
+        &HTTPRequestStreamParser::parseHeaderKey, &HTTPRequestStreamParser::parseHeaderValue,
+        &HTTPRequestStreamParser::parseBody,      &HTTPRequestStreamParser::parseDone};
+
+    std::size_t NextWord(std::string &res, const std::string &delim);
+
+    std::string _lastHeaderKey;
 
     std::string _buffer;
     std::vector<ziapi::http::Request> _output;
