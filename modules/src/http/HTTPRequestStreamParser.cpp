@@ -122,3 +122,29 @@ std::size_t HTTPRequestStreamParser::NextWord(std::string &res, const std::strin
     }
     return bytes_parsed;
 }
+
+std::size_t HTTPRequestStreamParser::parseBody()
+{
+    auto is_number = [](const std::string &s) {
+        return std::all_of(s.begin(), s.end(), [](const char &c) { return std::isdigit(c); });
+    };
+    auto &headers = _output.back().fields;
+    std::size_t bytes_parsed = 0;
+
+    if (headers.find("Content-Length") != headers.end() && is_number(headers["Content-Length"])) {
+        std::size_t content_length = 0;
+        std::istringstream(headers["Content-Length"]) >> content_length;
+
+        if (_buffer.size() >= content_length) {
+            _buffer = _buffer.substr(0, content_length);
+            return content_length;
+        }
+    } else if (headers.find("Transfer-Encoding") != headers.end() && headers["Transfer-Encoding"] == "chunked") {
+        // TODO : read <size><CRLF> and <body_chunk><CRLF> until having 0<CRLF><CRLF> (watch out, maybe a <body_chunk>
+        // has a 0<CRLF><CRLF>)
+        return bytes_parsed;
+    }
+
+    throw std::invalid_argument(
+        "Invalid body transmission. Specify either Content-Length or set the Transfer-Enconding header to \"chunked\"");
+}
