@@ -1,5 +1,7 @@
 #include "directory_listing/Module.hpp"
 
+#include <string>
+
 #include "dylib/dylib.hpp"
 
 void DirectoryListingModule::Init(const ziapi::config::Node &cfg)
