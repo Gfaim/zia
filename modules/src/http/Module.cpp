@@ -16,9 +16,9 @@ void HttpModule::Run(ziapi::http::IRequestOutputQueue &requests, ziapi::http::IR
     while (true) {
         if (now_plus_some_time < std::chrono::system_clock::now()) {
             ziapi::http::Request req{.version = ziapi::http::Version::kV3,
-                                     .method = "GET",
                                      .target = "/docs",
-                                     .fields = {},
+                                     .method = "GET",
+                                     .headers = {},
                                      .body = "damn this body bro"};
             ziapi::http::Context ctx{};
 
