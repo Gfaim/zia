@@ -1,7 +1,5 @@
 #include "logger/Module.hpp"
 
-#include <string>
-
 #include "dylib/dylib.hpp"
 
 [[nodiscard]] double LoggerModule::GetPostProcessorPriority() const noexcept { return 1; }

@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <fstream>
+#include <sstream>
 
 #include "ziapi/Config.hpp"
 #include "ziapi/Module.hpp"
