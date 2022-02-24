@@ -37,9 +37,9 @@ private:
     // Function pointer type that returns true if the current state has finished being parsed
     using ParseHandler = std::size_t (HTTPRequestStreamParser::*)(void);
 
-    enum RequestState : ushort { NONE, METHOD, TARGET, VERSION, HEADER_KEY, HEADER_VALUE, BODY, DONE, COUNT } _state;
+    enum RequestState : ushort { NONE, METHOD, TARGET, VERSION, HEADER_KEY, HEADER_VALUE, BODY, DONE, COUNT } state_;
 
-    ParseHandler _parsers[RequestState::COUNT] = {
+    ParseHandler parsers_[RequestState::COUNT] = {
         &HTTPRequestStreamParser::handleNone,     &HTTPRequestStreamParser::parseMethod,
         &HTTPRequestStreamParser::parseTarget,    &HTTPRequestStreamParser::parseVersion,
         &HTTPRequestStreamParser::parseHeaderKey, &HTTPRequestStreamParser::parseHeaderValue,
@@ -47,8 +47,8 @@ private:
 
     std::size_t NextWord(std::string &res, const std::string &delim);
 
-    std::string _lastHeaderKey;
+    std::string last_header_key_;
 
-    std::string _buffer;
-    std::vector<ziapi::http::Request> _output;
+    std::string buffer_;
+    ziapi::http::Request output_{};
 };
