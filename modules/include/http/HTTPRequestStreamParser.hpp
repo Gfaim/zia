@@ -37,7 +37,17 @@ private:
     // Function pointer type that returns true if the current state has finished being parsed
     using ParseHandler = std::size_t (HTTPRequestStreamParser::*)(void);
 
-    enum RequestState : ushort { NONE, METHOD, TARGET, VERSION, HEADER_KEY, HEADER_VALUE, BODY, DONE, COUNT } state_;
+    enum RequestState : unsigned short {
+        NONE,
+        METHOD,
+        TARGET,
+        VERSION,
+        HEADER_KEY,
+        HEADER_VALUE,
+        BODY,
+        DONE,
+        COUNT
+    } state_;
 
     ParseHandler parsers_[RequestState::COUNT] = {
         &HTTPRequestStreamParser::handleNone,     &HTTPRequestStreamParser::parseMethod,
