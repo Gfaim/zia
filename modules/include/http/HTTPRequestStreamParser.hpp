@@ -46,9 +46,14 @@ private:
         &HTTPRequestStreamParser::parseBody,      &HTTPRequestStreamParser::parseDone};
 
     // std::size_t BodyWithLength(std::size_t length);
-    std::size_t ChunkedBody();
+    std::size_t ParseBodyChunk();
     int last_chunk_size_ = -1;
 
+    /// Gets every bytes until `delim`. It will remove every one of them from the buffer,
+    /// including the leading `delim` bytes.
+    /// @returns The number of bytes utilized.
+    /// @param res A reference to where the result will be stored
+    /// @param delim The string that delimits the end of the word
     std::size_t NextWord(std::string &res, const std::string &delim);
 
     std::string last_header_key_;
