@@ -15,7 +15,7 @@ jobs:
         include:
           - os: windows-latest
             bin: unit_tests.exe
-            dir: ./build_tests/bin/
+            dir: ./Debug/
             conan-cxx-version: libstdc++11
           - os: ubuntu-latest
             bin: unit_tests

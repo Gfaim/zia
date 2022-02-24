@@ -15,18 +15,20 @@ void HttpModule::Run(ziapi::http::IRequestOutputQueue &requests, ziapi::http::IR
 
     while (true) {
         if (now_plus_some_time < std::chrono::system_clock::now()) {
-            ziapi::http::Request req{};
+            ziapi::http::Request req{.version = ziapi::http::Version::kV3,
+                                     .target = "/docs",
+                                     .method = "GET",
+                                     .headers = {},
+                                     .body = "damn this body bro"};
             ziapi::http::Context ctx{};
+
             requests.Push(std::make_pair(req, ctx));
-            std::cout << "BIM une requête" << std::endl;
             now_plus_some_time = std::chrono::system_clock::now() + std::chrono::seconds(1);
         }
         if (responses.Size()) {
             auto res_opt = responses.Pop();
             if (res_opt) {
                 auto res = res_opt->first;
-                std::cout << "<Response code=" << (int)res.status_code << ", body_size=" << res.body.size() << ">"
-                          << std::endl;
             }
         }
         if (must_stop_) {

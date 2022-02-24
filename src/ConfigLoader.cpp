@@ -1,7 +1,5 @@
 #include "ConfigLoader.hpp"
 
-#include <iostream>
-
 #include "config/ParseYAML.hpp"
 
 namespace zia {
