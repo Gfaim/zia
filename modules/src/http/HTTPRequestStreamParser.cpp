@@ -87,7 +87,7 @@ std::size_t HTTPRequestStreamParser::parseHeaderValue(void)
 
     bytes_parsed = NextWord(value, last_header ? end_of_headers_delim : CRLF);
 
-    output_.fields[last_header_key_] = value;
+    output_.headers[last_header_key_] = value;
 
     if (last_header) {
         last_header_key_.clear();
@@ -145,7 +145,7 @@ std::size_t HTTPRequestStreamParser::parseBody()
     auto is_number = [](const std::string &s) {
         return std::all_of(s.begin(), s.end(), [](const char &c) { return std::isdigit(c); });
     };
-    auto &headers = output_.fields;
+    auto &headers = output_.headers;
     std::size_t bytes_parsed = 0;
     std::size_t tmp_bytes = 0;
 
@@ -191,7 +191,7 @@ std::size_t HTTPRequestStreamParser::ParseBodyChunk()
             throw std::invalid_argument("Wrong size in chunked body");
         std::istringstream(tmp_buffer) >> last_chunk_size_;
     } else {
-        if (tmp_buffer.size() != last_chunk_size_)
+        if (tmp_buffer.size() != static_cast<std::size_t>(last_chunk_size_))
             throw std::invalid_argument("Body chunk is smaller than specified size");
         if (last_chunk_size_ == 0)
             state_ = DONE;
