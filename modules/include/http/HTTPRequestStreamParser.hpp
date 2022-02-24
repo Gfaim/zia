@@ -45,6 +45,10 @@ private:
         &HTTPRequestStreamParser::parseHeaderKey, &HTTPRequestStreamParser::parseHeaderValue,
         &HTTPRequestStreamParser::parseBody,      &HTTPRequestStreamParser::parseDone};
 
+    // std::size_t BodyWithLength(std::size_t length);
+    std::size_t ChunkedBody();
+    int last_chunk_size_ = -1;
+
     std::size_t NextWord(std::string &res, const std::string &delim);
 
     std::string last_header_key_;
