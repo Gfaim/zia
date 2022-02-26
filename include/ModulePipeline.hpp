@@ -4,27 +4,14 @@
 #include <memory>
 #include <vector>
 
+#include "ModuleAggregate.hpp"
+#include "RequestManager.hpp"
 #include "TSRequestOutputQueue.hpp"
 #include "TSResponseInputQueue.hpp"
 #include "ziapi/Http.hpp"
 #include "ziapi/Module.hpp"
 
 namespace zia {
-
-/// Aggregation of all the modules of a pipeline.
-struct ModuleAggregate {
-    ziapi::INetworkModule &network;
-
-    std::vector<std::reference_wrapper<ziapi::IPreProcessorModule>> pre_processors;
-
-    std::vector<std::reference_wrapper<ziapi::IHandlerModule>> handlers;
-
-    std::vector<std::reference_wrapper<ziapi::IPostProcessorModule>> post_processors;
-
-    /// Create a module bundle from a vector of modules by dynamically casting
-    /// each module into the right category.
-    static ModuleAggregate From(const std::vector<std::unique_ptr<ziapi::IModule>> &modules);
-};
 
 /// Manages an execution context for requests and responses.
 class ModulePipeline {
@@ -47,6 +34,7 @@ public:
 
 private:
     ModuleAggregate modules_;
+    RequestManager req_manager_;
     std::thread network_thread_;
     zia::TSRequestOutputQueue requests_;
     zia::TSResponseInputQueue responses_;

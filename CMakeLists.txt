@@ -46,7 +46,7 @@ set(SOURCES
     src/ModulePipeline.cpp
     src/ConfigLoader.cpp
     src/CLI.cpp
-    # fill here
+    src/RequestManager.cpp
 )
 
 # The list of tests source files
