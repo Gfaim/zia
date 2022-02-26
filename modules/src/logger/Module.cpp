@@ -4,16 +4,15 @@
 
 [[nodiscard]] double LoggerModule::GetPostProcessorPriority() const noexcept { return 1; }
 
-[[nodiscard]] bool LoggerModule::ShouldPostProcess(const ziapi::http::Context &ctx,
-                                                   const ziapi::http::Response &res) const
+[[nodiscard]] bool LoggerModule::ShouldPostProcess(const ziapi::http::Context &, const ziapi::http::Request &,
+                                                   const ziapi::http::Response &) const
 {
     return true;
 }
 
 [[nodiscard]] double LoggerModule::GetPreProcessorPriority() const noexcept { return 0; }
 
-[[nodiscard]] bool LoggerModule::ShouldPreProcess(const ziapi::http::Context &ctx,
-                                                  const ziapi::http::Request &req) const
+[[nodiscard]] bool LoggerModule::ShouldPreProcess(const ziapi::http::Context &, const ziapi::http::Request &) const
 {
     return true;
 }

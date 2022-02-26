@@ -12,14 +12,13 @@ void DirectoryListingModule::Init(const ziapi::config::Node &cfg)
 
 [[nodiscard]] double DirectoryListingModule::GetHandlerPriority() const noexcept { return 0.5f; }
 
-[[nodiscard]] bool DirectoryListingModule::ShouldHandle(const ziapi::http::Context &ctx,
+[[nodiscard]] bool DirectoryListingModule::ShouldHandle(const ziapi::http::Context &,
                                                         const ziapi::http::Request &req) const
 {
     return req.method == ziapi::http::method::kGet;
 }
 
-void DirectoryListingModule::Handle(ziapi::http::Context &ctx, const ziapi::http::Request &req,
-                                    ziapi::http::Response &res)
+void DirectoryListingModule::Handle(ziapi::http::Context &, const ziapi::http::Request &req, ziapi::http::Response &res)
 
 {
     auto target = req.target;

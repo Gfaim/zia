@@ -6,7 +6,7 @@
 
 class LoggerModule : virtual public ziapi::IPreProcessorModule, public ziapi::IPostProcessorModule {
 public:
-    void Init(const ziapi::config::Node &config) {}
+    void Init(const ziapi::config::Node &) override {}
 
     [[nodiscard]] ziapi::Version GetVersion() const noexcept override { return {3, 1, 0}; }
 
@@ -21,7 +21,7 @@ public:
 
     [[nodiscard]] double GetPostProcessorPriority() const noexcept override;
 
-    [[nodiscard]] bool ShouldPostProcess(const ziapi::http::Context &ctx,
+    [[nodiscard]] bool ShouldPostProcess(const ziapi::http::Context &ctx, const ziapi::http::Request &req,
                                          const ziapi::http::Response &res) const override;
 
     [[nodiscard]] double GetPreProcessorPriority() const noexcept override;
