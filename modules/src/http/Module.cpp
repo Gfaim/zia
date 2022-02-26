@@ -13,19 +13,19 @@ const char *HttpModule::kModuleDescription = "TCP network layer and HTTP parser"
 
 void HttpModule::Run(ziapi::http::IRequestOutputQueue &requests, ziapi::http::IResponseInputQueue &responses)
 {
-    asio::ip::tcp::acceptor acceptor(ctx_);
-
     AsyncAccept();
     StartThreadPool();
 }
 
 void HttpModule::AsyncAccept()
 {
-    acceptor_.async_accept([&](const auto &ec, auto socket) {
+    acceptor_.async_accept([&](const auto &ec, asio::ip::tcp::socket socket) {
         if (ec) {
+            return;
         }
-        ziapi::Logger::Info("New connection established");
+        ziapi::Logger::Info("New connection established with ", socket.remote_endpoint());
         clients_.emplace_back(std::make_pair(std::move(socket), asio::make_strand(ctx_)));
+        AsyncAccept();
     });
 }
 
