@@ -17,6 +17,8 @@ public:
     std::size_t Size() const noexcept override { return TSQueue::Size(); }
 
     std::optional<std::pair<ziapi::http::Response, ziapi::http::Context>> Pop() override { return TSQueue::Pop(); };
+
+    void Wait() noexcept override { return TSQueue::Wait(); }
 };
 
 }  // namespace zia
