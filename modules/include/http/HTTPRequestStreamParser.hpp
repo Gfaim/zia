@@ -25,37 +25,25 @@ public:
 private:
     static const inline std::string CRLF = "\r\n";
 
-    std::size_t handleNone();
-    std::size_t parseMethod();
-    std::size_t parseTarget();
-    std::size_t parseVersion();
-    std::size_t parseHeaderKey();
-    std::size_t parseHeaderValue();
-    std::size_t parseBody();
-    std::size_t parseDone();
+    std::size_t ParseMethod();
+    std::size_t ParseTarget();
+    std::size_t ParseVersion();
+    std::size_t ParseHeaderKey();
+    std::size_t ParseHeaderValue();
+    std::size_t ParseBody();
+    std::size_t ParseDone();
 
     // Function pointer type that returns true if the current state has finished being parsed
     using ParseHandler = std::size_t (HTTPRequestStreamParser::*)(void);
 
-    enum RequestState : unsigned short {
-        NONE,
-        METHOD,
-        TARGET,
-        VERSION,
-        HEADER_KEY,
-        HEADER_VALUE,
-        BODY,
-        DONE,
-        COUNT
-    } state_;
+    enum RequestState : unsigned short { METHOD, TARGET, VERSION, HEADER_KEY, HEADER_VALUE, BODY, DONE, COUNT } state_;
 
     ParseHandler parsers_[RequestState::COUNT] = {
-        &HTTPRequestStreamParser::handleNone,     &HTTPRequestStreamParser::parseMethod,
-        &HTTPRequestStreamParser::parseTarget,    &HTTPRequestStreamParser::parseVersion,
-        &HTTPRequestStreamParser::parseHeaderKey, &HTTPRequestStreamParser::parseHeaderValue,
-        &HTTPRequestStreamParser::parseBody,      &HTTPRequestStreamParser::parseDone};
+        &HTTPRequestStreamParser::ParseMethod,      &HTTPRequestStreamParser::ParseTarget,
+        &HTTPRequestStreamParser::ParseVersion,     &HTTPRequestStreamParser::ParseHeaderKey,
+        &HTTPRequestStreamParser::ParseHeaderValue, &HTTPRequestStreamParser::ParseBody,
+        &HTTPRequestStreamParser::ParseDone};
 
-    // std::size_t BodyWithLength(std::size_t length);
     std::size_t ParseBodyChunk();
     int last_chunk_size_ = -1;
 

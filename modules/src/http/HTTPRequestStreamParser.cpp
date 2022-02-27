@@ -9,7 +9,7 @@ const ziapi::http::Request &HTTPRequestStreamParser::GetRequest() { return outpu
 
 void HTTPRequestStreamParser::Clear()
 {
-    state_ = NONE;
+    state_ = METHOD;
     last_chunk_size_ = -1;
     last_header_key_.clear();
     buffer_.clear();
@@ -34,25 +34,17 @@ std::size_t HTTPRequestStreamParser::Feed(char *data, std::size_t size)
                           : size;  // either returns whole size or remaining (stored) bytes after a request completion
 }
 
-std::size_t HTTPRequestStreamParser::handleNone(void)
-{
-    if (!buffer_.empty()) {
-        state_ = METHOD;
-        output_ = ziapi::http::Request{};
-    }
-    return 0;
-}
-
-std::size_t HTTPRequestStreamParser::parseMethod(void)
+std::size_t HTTPRequestStreamParser::ParseMethod(void)
 {
     std::size_t bytes_parsed = NextWord(output_.method, " ");
 
-    if (bytes_parsed)
+    if (bytes_parsed) {
         state_ = TARGET;
+    }
     return bytes_parsed;
 }
 
-std::size_t HTTPRequestStreamParser::parseTarget(void)
+std::size_t HTTPRequestStreamParser::ParseTarget(void)
 {
     std::size_t bytes_parsed = NextWord(output_.target, " ");
 
@@ -61,7 +53,7 @@ std::size_t HTTPRequestStreamParser::parseTarget(void)
     return bytes_parsed;
 }
 
-std::size_t HTTPRequestStreamParser::parseHeaderKey(void)
+std::size_t HTTPRequestStreamParser::ParseHeaderKey(void)
 {
     std::string key;
     std::size_t bytes_parsed = NextWord(key, ":");
@@ -73,12 +65,12 @@ std::size_t HTTPRequestStreamParser::parseHeaderKey(void)
     return bytes_parsed;
 }
 
-std::size_t HTTPRequestStreamParser::parseHeaderValue(void)
+std::size_t HTTPRequestStreamParser::ParseHeaderValue(void)
 {
     std::string value;
     std::string end_of_headers_delim = CRLF + CRLF;
-    std::size_t end_of_headers = value.find(end_of_headers_delim);
-    std::size_t eol = value.find(CRLF);
+    std::size_t end_of_headers = buffer_.find(end_of_headers_delim);
+    std::size_t eol = buffer_.find(CRLF);
     std::size_t bytes_parsed = 0;
     bool last_header = (eol == end_of_headers);
 
@@ -86,6 +78,9 @@ std::size_t HTTPRequestStreamParser::parseHeaderValue(void)
         return bytes_parsed;
 
     bytes_parsed = NextWord(value, last_header ? end_of_headers_delim : CRLF);
+
+    if (value.front() == ' ')
+        value = value.substr(1);
 
     output_.headers[last_header_key_] = value;
 
@@ -98,7 +93,7 @@ std::size_t HTTPRequestStreamParser::parseHeaderValue(void)
     return bytes_parsed;
 }
 
-std::size_t HTTPRequestStreamParser::parseVersion(void)
+std::size_t HTTPRequestStreamParser::ParseVersion(void)
 {
     using Version = ziapi::http::Version;
 
@@ -117,11 +112,12 @@ std::size_t HTTPRequestStreamParser::parseVersion(void)
     if (tmp_buffer.starts_with(http_prefix) == false)
         throw std::invalid_argument("Invalid HTTP version prefix");
     std::istringstream(tmp_buffer.substr(http_prefix.length())) >> fversion;
+    fversion *= 10;
 
     // A number is not considered apart of an enum if it's out of the enum's bounds
     if (fversion < static_cast<std::size_t>(Version::kV1) || fversion > static_cast<std::size_t>(Version::kV3))
         throw std::invalid_argument("Invalid HTTP version number");
-    version = Version(fversion * 10);
+    version = Version(fversion);
     state_ = HEADER_KEY;
     return bytes_parsed;
 }
@@ -140,7 +136,7 @@ std::size_t HTTPRequestStreamParser::NextWord(std::string &res, const std::strin
     return bytes_parsed;
 }
 
-std::size_t HTTPRequestStreamParser::parseBody()
+std::size_t HTTPRequestStreamParser::ParseBody()
 {
     auto is_number = [](const std::string &s) {
         return std::all_of(s.begin(), s.end(), [](const char &c) { return std::isdigit(c); });
@@ -155,7 +151,8 @@ std::size_t HTTPRequestStreamParser::parseBody()
 
         std::istringstream(headers["Content-Length"]) >> content_length;
         if (buffer_.size() >= content_length) {
-            buffer_ = buffer_.substr(0, content_length);
+            output_.body = buffer_.substr(0, content_length);
+            buffer_ = buffer_.substr(content_length);
             bytes_parsed = content_length;
             state_ = DONE;
         }
@@ -186,8 +183,10 @@ std::size_t HTTPRequestStreamParser::ParseBodyChunk()
     if (eol == buffer_.npos)
         return bytes_parsed;
     bytes_parsed = NextWord(tmp_buffer, CRLF);
+    if (!bytes_parsed && last_chunk_size_ != 0)
+        return bytes_parsed;
     if (last_chunk_size_ < 0) {
-        if (!is_number(tmp_buffer))
+        if (!is_number(tmp_buffer) || tmp_buffer[0] == '-')
             throw std::invalid_argument("Wrong size in chunked body");
         std::istringstream(tmp_buffer) >> last_chunk_size_;
     } else {
@@ -199,4 +198,10 @@ std::size_t HTTPRequestStreamParser::ParseBodyChunk()
         last_chunk_size_ = -1;
     }
     return bytes_parsed;
+}
+
+std::size_t HTTPRequestStreamParser::ParseDone()
+{
+    state_ = METHOD;
+    return 0;
 }
