@@ -96,7 +96,7 @@ void ModulePipeline::Run()
         for (auto &ref_post : modules_.post_processors) {
             auto &post = ref_post.get();
 
-            if (post.ShouldPostProcess(ctx, res)) {
+            if (post.ShouldPostProcess(ctx, req, res)) {
                 post.PostProcess(ctx, res);
             }
         }

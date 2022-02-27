@@ -1,5 +1,6 @@
 #pragma once
 
+#include <asio.hpp>
 #include <atomic>
 #include <condition_variable>
 #include <iostream>
@@ -7,7 +8,7 @@
 
 class HttpModule : public ziapi::INetworkModule {
 public:
-    HttpModule() : must_stop_{false}, has_stopped_{} {}
+    HttpModule(unsigned int num_threads) : num_threads_(num_threads), acceptor_(ctx_) {}
 
     void Init(const ziapi::config::Node &) override {}
 
@@ -24,11 +25,21 @@ public:
     void Terminate() override;
 
 private:
+    void StartThreadPool();
+
+    void AsyncAccept();
+
     static const char *kModuleDescription;
 
     static const char *kModuleName;
 
-    std::atomic<bool> must_stop_;
+    asio::io_context ctx_;
 
-    std::condition_variable has_stopped_;
+    asio::ip::tcp::acceptor acceptor_;
+
+    std::vector<std::pair<asio::ip::tcp::socket, asio::io_context::strand>> clients_;
+
+    unsigned int num_threads_;
+
+    std::vector<std::thread> thread_pool_;
 };
