@@ -6,22 +6,23 @@ namespace zia {
 
 RequestManager::RequestManager(size_t max_threads, zia::ModuleAggregate &mods) : m_mods(mods), m_threads(max_threads)
 {
-    for (size_t i = 0; i < max_threads; i++) m_threads[i] = std::thread(job, this);
+    for (size_t i = 0; i < max_threads; i++) m_threads[i] = std::thread(worker, this);
 }
 
 RequestManager::~RequestManager()
 {
-    Terminate();
+    Clear();
+    m_dtor = true;
     for (auto &th : m_threads) {
         if (th.joinable())
             th.join();
     }
 }
 
-void RequestManager::AddRequest(std::pair<ziapi::http::Request, ziapi::http::Context> job)
+void RequestManager::AddRequest(std::pair<ziapi::http::Request, ziapi::http::Context> request)
 {
     m_req_lock_guard.lock();
-    m_req.push_back(job);
+    m_req.push_back(request);
     m_req_lock_guard.unlock();
 }
 
@@ -32,14 +33,14 @@ std::vector<std::pair<ziapi::http::Response, ziapi::http::Context>> RequestManag
     return res;
 }
 
-void RequestManager::Terminate()
+void RequestManager::Clear()
 {
     m_req_lock_guard.lock();
     m_req.clear();
     m_req_lock_guard.unlock();
 }
 
-void RequestManager::job(RequestManager *self)
+void RequestManager::worker(RequestManager *self)
 {
     while (true) {
         std::optional<std::pair<ziapi::http::Request, ziapi::http::Context>> m_current_req = std::nullopt;
@@ -47,6 +48,8 @@ void RequestManager::job(RequestManager *self)
         ziapi::http::Request req{};
         ziapi::http::Context ctx{};
 
+        if (self->m_dtor)
+            break;
         self->m_req_lock_guard.lock();
         if (!self->m_req.empty()) {
             m_current_req = self->m_req.front();
