@@ -42,6 +42,6 @@ public:
      */
     void Clear();
 
-    static void worker(RequestManager *self);
+    static void Worker(RequestManager *self);
 };
 }  // namespace zia

@@ -6,7 +6,7 @@ namespace zia {
 
 RequestManager::RequestManager(size_t max_threads, zia::ModuleAggregate &mods) : m_mods(mods), m_threads(max_threads)
 {
-    for (size_t i = 0; i < max_threads; i++) m_threads[i] = std::thread(worker, this);
+    for (size_t i = 0; i < max_threads; i++) m_threads[i] = std::thread(Worker, this);
 }
 
 RequestManager::~RequestManager()
@@ -40,7 +40,7 @@ void RequestManager::Clear()
     m_req_lock_guard.unlock();
 }
 
-void RequestManager::worker(RequestManager *self)
+void RequestManager::Worker(RequestManager *self)
 {
     while (true) {
         std::optional<std::pair<ziapi::http::Request, ziapi::http::Context>> m_current_req = std::nullopt;
