@@ -4,9 +4,11 @@
 #include <atomic>
 #include <condition_variable>
 #include <iostream>
+#include <optional>
 #include <ziapi/Module.hpp>
 
 #include "http/Connection.hpp"
+#include "http/SafeRequestQueue.hpp"
 
 class HttpModule : public ziapi::INetworkModule {
 public:
@@ -29,17 +31,19 @@ public:
 private:
     void StartThreadPool();
 
-    void AsyncAccept();
+    void AcceptConnections();
 
     void OnConnection(asio::ip::tcp::socket socket);
 
-    void StartAsyncReadLoop(Connection &conn);
+    void ReadRequest(Connection &conn);
 
     static const char *kModuleDescription;
 
     static const char *kModuleName;
 
     unsigned int num_threads_;
+
+    std::optional<SafeRequestQueue> requests_;
 
     asio::io_context ctx_;
 

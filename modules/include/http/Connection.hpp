@@ -3,22 +3,28 @@
 #include <asio.hpp>
 #include <string>
 
+#include "http/AsyncOp.hpp"
+#include "http/SafeRequestQueue.hpp"
+#include "ziapi/Http.hpp"
+
 class Connection {
 public:
-    Connection(asio::io_context::strand strand, asio::ip::tcp::socket socket);
+    Connection(asio::io_context::strand strand, asio::ip::tcp::socket socket, SafeRequestQueue &requests);
 
-    void AsyncRead(std::function<void(std::error_code, std::string)> &&completion_handler);
+    void AsyncSend(const ziapi::http::Response &res, std::function<void(std::error_code)> completion_handler);
 
-    void AsyncWrite(const asio::const_buffer &buf, std::function<void(std::error_code, std::size_t)> &&completion_handler);
+    void AsyncRead(std::function<void(std::error_code)> completion_handler);
 
     void Close();
 
 private:
+    SafeRequestQueue &requests_;
+
+    ReadRequestOp readop_;
+
+    WriteResponseOp writeop_;
+
     asio::io_context::strand strand_;
 
     asio::ip::tcp::socket socket_;
-
-    std::string writebuf_;
-
-    std::string readbuf_;
 };
