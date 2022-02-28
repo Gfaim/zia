@@ -1,5 +1,6 @@
 #include "http/HTTPRequestStreamParser.hpp"
 
+#include <algorithm>
 #include <sstream>
 #include <stdexcept>
 
