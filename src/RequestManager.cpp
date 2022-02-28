@@ -21,9 +21,8 @@ RequestManager::~RequestManager()
 
 void RequestManager::AddRequest(std::pair<ziapi::http::Request, ziapi::http::Context> request)
 {
-    m_req_lock_guard.lock();
+    std::scoped_lock lck(m_req_lock_guard);
     m_req.push_back(request);
-    m_req_lock_guard.unlock();
 }
 
 std::vector<std::pair<ziapi::http::Response, ziapi::http::Context>> RequestManager::PopResponses()
@@ -35,9 +34,8 @@ std::vector<std::pair<ziapi::http::Response, ziapi::http::Context>> RequestManag
 
 void RequestManager::Clear()
 {
-    m_req_lock_guard.lock();
+    std::scoped_lock lck(m_req_lock_guard);
     m_req.clear();
-    m_req_lock_guard.unlock();
 }
 
 void RequestManager::Worker(RequestManager *self)
@@ -50,12 +48,13 @@ void RequestManager::Worker(RequestManager *self)
 
         if (self->m_dtor)
             break;
-        self->m_req_lock_guard.lock();
-        if (!self->m_req.empty()) {
-            m_current_req = self->m_req.front();
-            self->m_req.erase(self->m_req.begin());
+        {
+            std::scoped_lock lck(self->m_req_lock_guard);
+            if (!self->m_req.empty()) {
+                m_current_req = self->m_req.front();
+                self->m_req.erase(self->m_req.begin());
+            }
         }
-        self->m_req_lock_guard.unlock();
         if (!m_current_req)
             continue;
         res.Bootstrap();
@@ -78,9 +77,10 @@ void RequestManager::Worker(RequestManager *self)
             if (post.ShouldPostProcess(ctx, res))
                 post.PostProcess(ctx, res);
         }
-        self->m_res_lock_guard.lock();
-        self->m_res.push_back(std::make_pair(res, ctx));
-        self->m_res_lock_guard.unlock();
+        {
+            std::scoped_lock lck(self->m_res_lock_guard);
+            self->m_res.push_back(std::make_pair(res, ctx));
+        }
     }
 }
 
