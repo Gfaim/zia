@@ -51,8 +51,13 @@ ModuleAggregate ModuleAggregate::From(const std::vector<std::unique_ptr<ziapi::I
 }
 
 ModulePipeline::ModulePipeline(const ziapi::config::Node &cfg,
-                               const std::vector<std::unique_ptr<ziapi::IModule>> &modules)
-    : modules_(ModuleAggregate::From(modules)), network_thread_(), requests_(), responses_(), should_stop_{false}
+                               const std::vector<std::unique_ptr<ziapi::IModule>> &modules, int nb_threads)
+    : modules_(ModuleAggregate::From(modules)),
+      req_manager_(nb_threads, modules_),
+      network_thread_(),
+      requests_(),
+      responses_(),
+      should_stop_{false}
 
 {
     for (auto &module : modules) {
@@ -64,44 +69,12 @@ void ModulePipeline::Run()
 {
     network_thread_ = std::thread([&]() { modules_.network.Run(requests_, responses_); });
     while (true) {
-        ziapi::http::Response res{};
-        ziapi::http::Request req{};
-        ziapi::http::Context ctx{};
         auto try_req = requests_.Pop();
-
         if (should_stop_)
             break;
-        if (!try_req) {
-            continue;
-        }
-        res.Bootstrap();
-        std::tie(req, ctx) = try_req.value();
-
-        for (auto &pre_ref : modules_.pre_processors) {
-            auto &pre = pre_ref.get();
-
-            if (pre.ShouldPreProcess(ctx, req)) {
-                pre.PreProcess(ctx, req);
-            }
-        }
-
-        for (auto &ref_handler : modules_.handlers) {
-            auto &handler = ref_handler.get();
-
-            if (handler.ShouldHandle(ctx, req)) {
-                handler.Handle(ctx, req, res);
-            }
-        }
-
-        for (auto &ref_post : modules_.post_processors) {
-            auto &post = ref_post.get();
-
-            if (post.ShouldPostProcess(ctx, req, res)) {
-                post.PostProcess(ctx, res);
-            }
-        }
-
-        responses_.Push(std::make_pair(res, ctx));
+        if (try_req)
+            req_manager_.AddRequest(try_req.value());
+        for (auto &res : req_manager_.PopResponses()) responses_.Push(std::move(res));
     }
 }
 

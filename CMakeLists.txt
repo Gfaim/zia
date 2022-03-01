@@ -46,7 +46,7 @@ set(SOURCES
     src/ModulePipeline.cpp
     src/ConfigLoader.cpp
     src/CLI.cpp
-    # fill here
+    src/RequestManager.cpp
 )
 
 # The list of tests source files
@@ -64,7 +64,7 @@ if(UNIT_TESTS)
     )
     enable_testing()
     include(GoogleTest)
-    gtest_discover_tests(${BIN})
+    gtest_discover_tests(${BIN} PROPERTIES TIMEOUT 600)
     target_link_libraries(${BIN} PRIVATE gtest_main)
 else()
     add_executable(${BIN}

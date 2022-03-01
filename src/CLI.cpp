@@ -8,7 +8,7 @@ namespace zia {
 CLI::CLI(const zia::Params &args, const ziapi::config::Node &cfg)
     : libs_(zia::LoadDynamicLibsFromDirs(zia::GetLibraryPathFromCfg(cfg))),
       modules_(zia::GetModulesFromLibs(libs_)),
-      pipeline_(cfg, modules_),
+      pipeline_(cfg, modules_, args.num_threads),
       pipeline_thread_(),
       args_(args),
       cfg_(cfg)

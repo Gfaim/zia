@@ -16,9 +16,12 @@ std::vector<dylib> LoadDynamicLibsFromDir(const std::filesystem::path &lib_path)
         if (file.path().extension() == dylib::extension) {
             try {
                 dylib lib(file.path().string());
+                lib.get_function<ziapi::IModule *()>("LoadZiaModule");
                 libs.push_back(std::move(lib));
-            } catch (const dylib::exception &) {
+            } catch (const dylib::handle_error &) {
                 ziapi::Logger::Warning("Failed to load lib: ", file.path().string());
+            } catch (const dylib::symbol_error &) {
+                ziapi::Logger::Warning("Failed to load symbol \"LoadZiaModule\" on lib: ", file.path().string());
             }
         }
     }
