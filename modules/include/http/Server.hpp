@@ -1,6 +1,7 @@
 #pragma once
 
 #include <asio.hpp>
+#include <condition_variable>
 #include <ziapi/Http.hpp>
 
 #include "http/ConnectionManager.hpp"
@@ -30,6 +31,8 @@ private:
     ConnectionManager conn_manager_;
 
     std::vector<std::thread> thread_pool_;
+
+    std::condition_variable must_stop_cv_;
 
     SafeRequestQueue requests_;
 

@@ -18,6 +18,8 @@ public:
 
     void Close();
 
+    void Send(const ziapi::http::Response &res);
+
     asio::ip::tcp::endpoint RemoteEndpoint() const;
 
 private:
@@ -32,4 +34,6 @@ private:
     ConnectionManager &conn_manager_;
 
     std::array<char, 4096> buffer_;
+
+    std::string outbuf_;
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 
 #include "http/Connection.hpp"
 
@@ -14,6 +15,10 @@ public:
 
     void CloseAll();
 
+    void Dispatch(const std::pair<ziapi::http::Response, ziapi::http::Context> &res);
+
 private:
+    std::mutex mu_;
+
     std::vector<SharedConnection> connections_;
 };

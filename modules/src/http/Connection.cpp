@@ -16,40 +16,48 @@ void Connection::Start() { DoRead(); }
 void Connection::DoRead()
 {
     socket_.async_read_some(asio::buffer(buffer_), [this, me = shared_from_this()](auto ec, auto bytes_read) {
-        /// TODO: Do something with the read data.
         if (ec) {
             conn_manager_.Close(me);
             return;
         }
-        ziapi::Logger::Debug("incoming message of size ", bytes_read);
+        {
+            /// TODO: Do something with the buffer.
+            ziapi::Logger::Debug("incoming message of size ", bytes_read);
+            ziapi::http::Request req;
+            ziapi::http::Context ctx;
+            req.version = ziapi::http::Version::kV1_1;
+            req.target = "/index.html";
+            req.method = ziapi::http::method::kGet;
+            req.headers.emplace(ziapi::http::header::kAuthorization, "Basic diego:mdp");
+            req.body = "Hello world!";
+            ctx.emplace("client.socket.address",
+                        std::make_any<std::string>(socket_.remote_endpoint().address().to_string()));
+            ctx.emplace("client.socket.port", std::make_any<std::uint16_t>(socket_.remote_endpoint().port()));
+            requests_.Push(std::make_pair(std::move(req), std::move(ctx)));
+        }
         DoRead();
     });
 }
 
-void Connection::DoWrite() {}
+void Connection::DoWrite()
+{
+    asio::async_write(socket_, asio::buffer(outbuf_), [this, me = shared_from_this()](auto ec, auto bytes_written) {
+        if (ec) {
+            conn_manager_.Close(me);
+            return;
+        }
+    });
+}
+
+void Connection::Send(const ziapi::http::Response &)
+{
+    {
+        /// TODO: Set oufbuf_ to the actual stringified response.
+        outbuf_ = "Response";
+    }
+    DoWrite();
+}
 
 asio::ip::tcp::endpoint Connection::RemoteEndpoint() const { return socket_.remote_endpoint(); }
-
-// void Connection::AsyncRead(std::function<void(std::error_code)> handler)
-// {
-//     ziapi::Logger::Debug("conn.AsyncRead");
-//     asio::http::async_read_request(socket_, reqbuf_, [=](auto ec) {
-//         ziapi::Logger::Debug("async_read_request");
-//         if (ec) {
-//             handler(ec);
-//             return;
-//         }
-//         ziapi::http::Context http_ctx;
-//         http_ctx.emplace(std::string("client.socket.address"),
-//                          std::make_any<std::string>(socket_.remote_endpoint().address().to_string()));
-//         http_ctx.emplace(std::string("client.socket.port"),
-//                          std::make_any<std::uint16_t>(socket_.remote_endpoint().port()));
-//         requests_.Push(
-//             std::make_pair<ziapi::http::Request, ziapi::http::Context>(std::move(reqbuf_), std::move(http_ctx)));
-//         handler(ec);
-//     });
-// }
-
-// void Connection::AsyncSend(const ziapi::http::Response &, std::function<void(std::error_code)> completion_handler) {}
 
 void Connection::Close() { socket_.close(); }

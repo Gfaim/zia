@@ -11,6 +11,15 @@ void Server::Start(unsigned int num_threads_)
 {
     AcceptConnections();
     StartThreadPool(num_threads_);
+    while (true) {
+        if (responses_.Size()) {
+            auto res = responses_.Pop();
+            if (res) {
+                conn_manager_.Dispatch(*res);
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::nanoseconds(1000));
+    }
 }
 
 void Server::AcceptConnections()
