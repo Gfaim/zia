@@ -7,8 +7,7 @@
 #include <optional>
 #include <ziapi/Module.hpp>
 
-#include "http/Connection.hpp"
-#include "http/SafeRequestQueue.hpp"
+#include "http/Server.hpp"
 
 class HttpModule : public ziapi::INetworkModule {
 public:
@@ -29,29 +28,11 @@ public:
     void Terminate() override;
 
 private:
-    void StartThreadPool();
-
-    void AcceptConnections();
-
-    void OnConnection(asio::ip::tcp::socket socket);
-
-    void ReadRequest(Connection &conn);
-
     static const char *kModuleDescription;
 
     static const char *kModuleName;
 
     unsigned int num_threads_;
 
-    std::optional<SafeRequestQueue> requests_;
-
-    asio::io_context ctx_;
-
-    asio::io_context::strand strand_;
-
-    asio::ip::tcp::acceptor acceptor_;
-
-    std::vector<Connection> clients_;
-
-    std::vector<std::thread> thread_pool_;
+    std::optional<Server> server_;
 };

@@ -1,30 +1,28 @@
 #pragma once
 
 #include <asio.hpp>
+#include <memory>
 #include <string>
 
-#include "http/AsyncOp.hpp"
 #include "http/SafeRequestQueue.hpp"
 #include "ziapi/Http.hpp"
 
-class Connection {
+class ConnectionManager;
+
+class Connection : public std::enable_shared_from_this<Connection> {
 public:
-    Connection(asio::io_context::strand strand, asio::ip::tcp::socket socket, SafeRequestQueue &requests);
+    Connection(asio::ip::tcp::socket socket, SafeRequestQueue &requests, ConnectionManager &conn_manager);
 
-    void AsyncSend(const ziapi::http::Response &res, std::function<void(std::error_code)> completion_handler);
+    void AsyncSend();
 
-    void AsyncRead(std::function<void(std::error_code)> completion_handler);
+    void AsyncRead();
 
     void Close();
 
 private:
+    asio::ip::tcp::socket socket_;
+
     SafeRequestQueue &requests_;
 
-    ReadRequestOp readop_;
-
-    WriteResponseOp writeop_;
-
-    asio::io_context::strand strand_;
-
-    asio::ip::tcp::socket socket_;
+    ConnectionManager &conn_manager_;
 };
