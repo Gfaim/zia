@@ -28,7 +28,6 @@ void Server::DoAccept()
         if (!acceptor_.is_open()) {
             return;
         }
-        ziapi::Logger::Debug("new connection established ", socket.remote_endpoint());
         if (!ec) {
             conn_manager_.Add(std::make_shared<Connection>(std::move(socket), requests_, conn_manager_));
         }

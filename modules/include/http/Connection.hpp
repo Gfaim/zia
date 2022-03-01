@@ -18,6 +18,8 @@ public:
 
     void Close();
 
+    asio::ip::tcp::endpoint RemoteEndpoint() const;
+
 private:
     void DoRead();
 

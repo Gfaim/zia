@@ -4,6 +4,8 @@
 #include <asio.hpp>
 #include <ziapi/Logger.hpp>
 
+#include "http/ConnectionManager.hpp"
+
 Connection::Connection(asio::ip::tcp::socket socket, SafeRequestQueue &requests, ConnectionManager &conn_manager)
     : socket_(std::move(socket)), requests_(requests), conn_manager_(conn_manager)
 {
@@ -16,7 +18,7 @@ void Connection::DoRead()
     socket_.async_read_some(asio::buffer(buffer_), [this, me = shared_from_this()](auto ec, auto bytes_read) {
         /// TODO: Do something with the read data.
         if (ec) {
-            Close();
+            conn_manager_.Close(me);
             return;
         }
         ziapi::Logger::Debug("incoming message of size ", bytes_read);
@@ -25,6 +27,8 @@ void Connection::DoRead()
 }
 
 void Connection::DoWrite() {}
+
+asio::ip::tcp::endpoint Connection::RemoteEndpoint() const { return socket_.remote_endpoint(); }
 
 // void Connection::AsyncRead(std::function<void(std::error_code)> handler)
 // {
