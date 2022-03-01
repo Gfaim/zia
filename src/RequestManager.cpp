@@ -74,7 +74,7 @@ void RequestManager::Worker(RequestManager *self)
 
         for (auto &ref_post : self->m_mods.post_processors) {
             auto &post = ref_post.get();
-            if (post.ShouldPostProcess(ctx, res))
+            if (post.ShouldPostProcess(ctx, req, res))
                 post.PostProcess(ctx, res);
         }
         {
