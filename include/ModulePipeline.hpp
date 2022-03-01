@@ -19,7 +19,8 @@ public:
     /// Constructs the object from all the modules that make up the pipeline.
     /// If there are multiple INetworkModules in the modules vector, this
     /// constructor will throw.
-    ModulePipeline(const ziapi::config::Node &cfg, const std::vector<std::unique_ptr<ziapi::IModule>> &modules);
+    ModulePipeline(const ziapi::config::Node &cfg, const std::vector<std::unique_ptr<ziapi::IModule>> &modules,
+                   int nb_threads);
 
     ModulePipeline(const ModulePipeline &) = delete;
     ModulePipeline &operator=(const ModulePipeline &) = delete;

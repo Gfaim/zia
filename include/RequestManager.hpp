@@ -24,8 +24,11 @@ public:
      *  @param max_threads maximum threads allowed to run simultaneously
      *  @param mods the zia::ModuleAggregate class that contains modules
      */
-    RequestManager(size_t max_threads, zia::ModuleAggregate &mods);
+    RequestManager(int max_threads, zia::ModuleAggregate &mods);
     ~RequestManager();
+
+    RequestManager(const RequestManager &) = delete;
+    RequestManager &operator=(const RequestManager &) = delete;
     /**
      *  Add a request to the request manager, it will be given to one of available workers, or
      *  will be pending until a worker is available

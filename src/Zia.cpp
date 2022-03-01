@@ -6,6 +6,7 @@
 #include "ConfigLoader.hpp"
 #include "ModuleLoader.hpp"
 #include "cxxopts.hpp"
+#include "ziapi/Color.hpp"
 
 namespace zia {
 
@@ -19,7 +20,7 @@ int Zia::Start(int argc, char const **argv)
     } catch (const HelpException &) {
         return ExitSuccess;
     } catch (const std::exception &e) {
-        std::cerr << e.what() << '\n';
+        std::cerr << ziapi::color::RED << "Exception occured: " << ziapi::color::DEFAULT << e.what() << '\n';
         return ExitFailure;
     }
     return ExitSuccess;
@@ -40,6 +41,8 @@ Params Zia::ParseCommandLineArguments(int ac, char const **av)
         std::cout << options.help() << std::endl;
         throw HelpException();
     }
+    if (result["num-threads"].as<int>() <= 0)
+        throw std::logic_error("num-threads argument must be a positive integer");
 
     return Params{.config_file_path = result["config"].as<std::string>(),
                   .num_threads = result["num-threads"].as<int>()};

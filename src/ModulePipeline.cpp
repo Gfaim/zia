@@ -51,9 +51,9 @@ ModuleAggregate ModuleAggregate::From(const std::vector<std::unique_ptr<ziapi::I
 }
 
 ModulePipeline::ModulePipeline(const ziapi::config::Node &cfg,
-                               const std::vector<std::unique_ptr<ziapi::IModule>> &modules)
+                               const std::vector<std::unique_ptr<ziapi::IModule>> &modules, int nb_threads)
     : modules_(ModuleAggregate::From(modules)),
-      req_manager_(4, modules_),
+      req_manager_(nb_threads, modules_),
       network_thread_(),
       requests_(),
       responses_(),

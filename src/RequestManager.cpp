@@ -4,9 +4,9 @@
 
 namespace zia {
 
-RequestManager::RequestManager(size_t max_threads, zia::ModuleAggregate &mods) : m_mods(mods), m_threads(max_threads)
+RequestManager::RequestManager(int max_threads, zia::ModuleAggregate &mods) : m_mods(mods), m_threads(max_threads)
 {
-    for (size_t i = 0; i < max_threads; i++) m_threads[i] = std::thread(Worker, this);
+    for (int i = 0; i < max_threads; i++) m_threads[i] = std::thread(Worker, this);
 }
 
 RequestManager::~RequestManager()
