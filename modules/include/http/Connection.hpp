@@ -22,6 +22,8 @@ public:
 
     asio::ip::tcp::endpoint RemoteEndpoint() const;
 
+    void ShouldClose(bool should_close);
+
 private:
     void DoRead();
 
@@ -36,4 +38,6 @@ private:
     std::array<char, 4096> buffer_;
 
     std::string outbuf_;
+
+    bool should_close_;
 };

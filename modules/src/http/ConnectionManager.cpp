@@ -36,6 +36,9 @@ void ConnectionManager::Dispatch(const std::pair<ziapi::http::Response, ziapi::h
         auto remote = conn->RemoteEndpoint();
         if (remote.address().to_string() == std::any_cast<std::string>(res.second.at("client.socket.address")) &&
             remote.port() == std::any_cast<std::uint16_t>(res.second.at("client.socket.port"))) {
+            if (std::any_cast<std::string>(res.second.at("http.connection")) != "close") {
+                conn->ShouldClose(false);
+            }
             conn->Send(res.first);
         }
     }
