@@ -1,6 +1,10 @@
 #include "http/ConnectionManager.hpp"
 
-void ConnectionManager::Add(SharedConnection conn) { connections_.emplace_back(conn); }
+void ConnectionManager::Add(SharedConnection conn)
+{
+    connections_.emplace_back(conn);
+    conn->Start();
+}
 
 void ConnectionManager::Close(SharedConnection conn)
 {

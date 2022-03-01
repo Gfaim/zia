@@ -9,6 +9,23 @@ Connection::Connection(asio::ip::tcp::socket socket, SafeRequestQueue &requests,
 {
 }
 
+void Connection::Start() { DoRead(); }
+
+void Connection::DoRead()
+{
+    socket_.async_read_some(asio::buffer(buffer_), [this, me = shared_from_this()](auto ec, auto bytes_read) {
+        /// TODO: Do something with the read data.
+        if (ec) {
+            Close();
+            return;
+        }
+        ziapi::Logger::Debug("incoming message of size ", bytes_read);
+        DoRead();
+    });
+}
+
+void Connection::DoWrite() {}
+
 // void Connection::AsyncRead(std::function<void(std::error_code)> handler)
 // {
 //     ziapi::Logger::Debug("conn.AsyncRead");

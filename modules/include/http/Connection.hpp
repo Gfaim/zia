@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <asio.hpp>
 #include <memory>
 #include <string>
@@ -13,16 +14,20 @@ class Connection : public std::enable_shared_from_this<Connection> {
 public:
     Connection(asio::ip::tcp::socket socket, SafeRequestQueue &requests, ConnectionManager &conn_manager);
 
-    void AsyncSend();
-
-    void AsyncRead();
+    void Start();
 
     void Close();
 
 private:
+    void DoRead();
+
+    void DoWrite();
+
     asio::ip::tcp::socket socket_;
 
     SafeRequestQueue &requests_;
 
     ConnectionManager &conn_manager_;
+
+    std::array<char, 4096> buffer_;
 };
