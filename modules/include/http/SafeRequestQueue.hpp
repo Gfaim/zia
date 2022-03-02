@@ -1,3 +1,5 @@
+#pragma once
+
 #include <mutex>
 
 #include "ziapi/Http.hpp"
@@ -8,7 +10,7 @@ public:
 
     void Push(std::pair<ziapi::http::Request, ziapi::http::Context> &&req);
 
-    [[nodiscard]] std::size_t Size() const noexcept;
+    [[nodiscard]] std::size_t Size() noexcept;
 
 private:
     std::mutex mu_;
