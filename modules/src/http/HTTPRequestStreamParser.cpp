@@ -4,35 +4,38 @@
 #include <sstream>
 #include <stdexcept>
 
-bool HTTPRequestStreamParser::Done() { return state_ == DONE; }
+bool HTTPRequestStreamParser::Done() { return state_ == kDone; }
 
 const ziapi::http::Request &HTTPRequestStreamParser::GetRequest() { return output_; }
 
 void HTTPRequestStreamParser::Clear()
 {
-    state_ = METHOD;
+    state_ = kMethod;
     last_chunk_size_ = -1;
     last_header_key_.clear();
-    buffer_.clear();
+    output_ = ziapi::http::Request{};
 }
+#include <iostream>
 
 std::size_t HTTPRequestStreamParser::Feed(char *data, std::size_t size)
 {
     std::size_t parsed_bytes = 0;
     std::size_t total_parsed_bytes = 0;
-    std::size_t old_buffer_size = 0;
+    std::size_t old_buffer_size = buffer_.size();
 
     buffer_.insert(buffer_.end(), data, data + size);
-    old_buffer_size = buffer_.size();
+
+    if (state_ == kDone)
+        state_ = kMethod;
 
     do {
         parsed_bytes = (this->*parsers_[state_])();  // total bytes parsed thanks to the function call, taking into
                                                      // account those already stored
         total_parsed_bytes += parsed_bytes;
-    } while (parsed_bytes && state_ != DONE);
+    } while (parsed_bytes && state_ != kDone);
 
-    return state_ == DONE ? old_buffer_size - total_parsed_bytes
-                          : size;  // either returns whole size or remaining (stored) bytes after a request completion
+    return state_ == kDone ? total_parsed_bytes - old_buffer_size
+                           : size;  // either returns whole size or bytes used for a request completion
 }
 
 std::size_t HTTPRequestStreamParser::ParseMethod(void)
@@ -40,7 +43,10 @@ std::size_t HTTPRequestStreamParser::ParseMethod(void)
     std::size_t bytes_parsed = NextWord(output_.method, " ");
 
     if (bytes_parsed) {
-        state_ = TARGET;
+        if (!std::all_of(output_.method.begin(), output_.method.end(),
+                         [](const char &c) { return isupper(c) && isalpha(c); }))
+            throw std::invalid_argument(std::string("Specify a valid http method") + output_.method);
+        state_ = kTarget;
     }
     return bytes_parsed;
 }
@@ -49,20 +55,32 @@ std::size_t HTTPRequestStreamParser::ParseTarget(void)
 {
     std::size_t bytes_parsed = NextWord(output_.target, " ");
 
+    if (bytes_parsed == 2)
+        throw std::invalid_argument("Specify a valid http target");
     if (bytes_parsed)
-        state_ = VERSION;
+        state_ = kVersion;
     return bytes_parsed;
 }
 
 std::size_t HTTPRequestStreamParser::ParseHeaderKey(void)
 {
     std::string key;
-    std::size_t bytes_parsed = NextWord(key, ":");
+    std::size_t crlf_tmp = buffer_.find(CRLF);
+    std::size_t tdots_tmp = buffer_.find(":");
+    std::size_t bytes_parsed = 0;
+
+    if (tdots_tmp < crlf_tmp)
+        bytes_parsed = NextWord(key, ":");
 
     if (bytes_parsed) {
+        if (bytes_parsed == 1)
+            throw std::invalid_argument("Specify a valid header value");
         last_header_key_ = key;
-        state_ = HEADER_VALUE;
-    }  // else if check if string has wrong characters, throw
+        state_ = kHeaderValue;
+    } else if (crlf_tmp == 0) {
+        bytes_parsed = NextWord(key, CRLF);
+        state_ = kBody;
+    }
     return bytes_parsed;
 }
 
@@ -87,9 +105,9 @@ std::size_t HTTPRequestStreamParser::ParseHeaderValue(void)
 
     if (last_header) {
         last_header_key_.clear();
-        state_ = BODY;
+        state_ = kBody;
     } else
-        state_ = HEADER_KEY;
+        state_ = kHeaderKey;
 
     return bytes_parsed;
 }
@@ -119,7 +137,7 @@ std::size_t HTTPRequestStreamParser::ParseVersion(void)
     if (fversion < static_cast<std::size_t>(Version::kV1) || fversion > static_cast<std::size_t>(Version::kV3))
         throw std::invalid_argument("Invalid HTTP version number");
     version = Version(fversion);
-    state_ = HEADER_KEY;
+    state_ = kHeaderKey;
     return bytes_parsed;
 }
 
@@ -155,14 +173,14 @@ std::size_t HTTPRequestStreamParser::ParseBody()
             output_.body = buffer_.substr(0, content_length);
             buffer_ = buffer_.substr(content_length);
             bytes_parsed = content_length;
-            state_ = DONE;
+            state_ = kDone;
         }
     } else if (headers.find("Transfer-Encoding") != headers.end() && headers["Transfer-Encoding"] == "chunked") {
         // If the body is sent in chunks
         do {
             tmp_bytes = ParseBodyChunk();
             bytes_parsed += tmp_bytes;
-        } while (tmp_bytes && state_ != DONE);
+        } while (tmp_bytes && state_ != kDone);
     } else {
         throw std::invalid_argument(
             "Invalid body transmission. Specify either Content-Length or set the Transfer-Enconding header to "
@@ -187,22 +205,17 @@ std::size_t HTTPRequestStreamParser::ParseBodyChunk()
     if (!bytes_parsed && last_chunk_size_ != 0)
         return bytes_parsed;
     if (last_chunk_size_ < 0) {
-        if (!is_number(tmp_buffer) || tmp_buffer[0] == '-')
+        if (!is_number(tmp_buffer))
             throw std::invalid_argument("Wrong size in chunked body");
         std::istringstream(tmp_buffer) >> last_chunk_size_;
     } else {
         if (tmp_buffer.size() != static_cast<std::size_t>(last_chunk_size_))
             throw std::invalid_argument("Body chunk is smaller than specified size");
+
         if (last_chunk_size_ == 0)
-            state_ = DONE;
+            state_ = kDone;
         body.insert(body.end(), tmp_buffer.begin(), tmp_buffer.end());
         last_chunk_size_ = -1;
     }
     return bytes_parsed;
-}
-
-std::size_t HTTPRequestStreamParser::ParseDone()
-{
-    state_ = METHOD;
-    return 0;
 }
