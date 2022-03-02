@@ -2,8 +2,10 @@
 
 #include <array>
 #include <asio.hpp>
+#include <atomic>
 #include <memory>
 #include <string>
+#include <ziapi/Logger.hpp>
 
 #include "http/SafeRequestQueue.hpp"
 #include "ziapi/Http.hpp"
@@ -18,9 +20,11 @@ public:
 
     void Close();
 
+    bool IsOpen();
+
     void Send(const ziapi::http::Response &res);
 
-    asio::ip::tcp::endpoint RemoteEndpoint() const;
+    const asio::ip::tcp::endpoint &RemoteEndpoint() const;
 
     void ShouldClose(bool should_close);
 
@@ -28,6 +32,9 @@ private:
     void DoRead();
 
     void DoWrite();
+
+    template <typename CompletionHandler>
+    void CallbackWrapper(std::error_code ec, CompletionHandler handler);
 
     asio::ip::tcp::socket socket_;
 
@@ -37,7 +44,44 @@ private:
 
     std::array<char, 4096> buffer_;
 
+    asio::ip::tcp::endpoint remote_endpoint_;
+
     std::string outbuf_;
 
     bool should_close_;
+
+    std::atomic_bool is_open_;
 };
+
+#include <memory>
+#include <utility>
+
+class ConnectionManager {
+public:
+    using SharedConnection = std::shared_ptr<Connection>;
+
+    void Add(SharedConnection conn);
+
+    void Close(SharedConnection conn);
+
+    void CloseAll();
+
+    void Dispatch(const std::pair<ziapi::http::Response, ziapi::http::Context> &res);
+
+private:
+    std::mutex mu_;
+
+    std::vector<SharedConnection> connections_;
+};
+
+template <typename CompletionHandler>
+void Connection::CallbackWrapper(std::error_code ec, CompletionHandler handler)
+{
+    if (ec) {
+        if (IsOpen()) {
+            conn_manager_.Close(shared_from_this());
+        }
+        return;
+    }
+    handler();
+}
