@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cstdint>
 #include <vector>
 
@@ -7,6 +9,8 @@
 /// Feed bytes to the parser till a request is formed.
 class HTTPRequestStreamParser {
 public:
+    HTTPRequestStreamParser() = default;
+
     /// Feed bytes to the parser.
     /// @throws Throws upon parsing failure.
     /// @returns The number of bytes utilized. If that number is lower than size it means the request has been
@@ -31,7 +35,6 @@ private:
     std::size_t ParseHeaderKey();
     std::size_t ParseHeaderValue();
     std::size_t ParseBody();
-    // std::size_t ParseDone();
 
     // Function pointer type that returns true if the current state has finished being parsed
     using ParseHandler = std::size_t (HTTPRequestStreamParser::*)(void);
@@ -45,7 +48,7 @@ private:
         kBody,
         kDone,
         kCount
-    } state_;
+    } state_{};
 
     ParseHandler parsers_[RequestState::kCount - 1] = {
         &HTTPRequestStreamParser::ParseMethod,      &HTTPRequestStreamParser::ParseTarget,
@@ -62,8 +65,8 @@ private:
     /// @param delim The string that delimits the end of the word
     std::size_t NextWord(std::string &res, const std::string &delim);
 
-    std::string last_header_key_;
+    std::string last_header_key_{};
 
-    std::string buffer_;
+    std::string buffer_{};
     ziapi::http::Request output_{};
 };

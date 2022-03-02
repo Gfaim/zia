@@ -1,8 +1,11 @@
 #include "http/HTTPRequestStreamParser.hpp"
 
 #include <algorithm>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
+
+#include "http/HTTPRequestStreamParser.hpp"
 
 bool HTTPRequestStreamParser::Done() { return state_ == kDone; }
 
@@ -15,7 +18,6 @@ void HTTPRequestStreamParser::Clear()
     last_header_key_.clear();
     output_ = ziapi::http::Request{};
 }
-#include <iostream>
 
 std::size_t HTTPRequestStreamParser::Feed(char *data, std::size_t size)
 {
@@ -43,8 +45,8 @@ std::size_t HTTPRequestStreamParser::ParseMethod(void)
     std::size_t bytes_parsed = NextWord(output_.method, " ");
 
     if (bytes_parsed) {
-        if (!std::all_of(output_.method.begin(), output_.method.end(),
-                         [](const char &c) { return isupper(c) && isalpha(c); }))
+        if (bytes_parsed == 1 || !std::all_of(output_.method.begin(), output_.method.end(),
+                                              [](const char &c) { return isupper(c) && isalpha(c); }))
             throw std::invalid_argument(std::string("Specify a valid http method") + output_.method);
         state_ = kTarget;
     }
@@ -55,7 +57,7 @@ std::size_t HTTPRequestStreamParser::ParseTarget(void)
 {
     std::size_t bytes_parsed = NextWord(output_.target, " ");
 
-    if (bytes_parsed == 2)
+    if (bytes_parsed == 1)
         throw std::invalid_argument("Specify a valid http target");
     if (bytes_parsed)
         state_ = kVersion;
@@ -164,7 +166,10 @@ std::size_t HTTPRequestStreamParser::ParseBody()
     std::size_t bytes_parsed = 0;
     std::size_t tmp_bytes = 0;
 
-    if (headers.find("Content-Length") != headers.end() && is_number(headers["Content-Length"])) {
+    if (headers.find("Content-Length") != headers.end()) {
+        if (!is_number(headers["Content-Length"]))
+            throw std::invalid_argument("Invalid Content-Length");
+
         // If Content-Length (body size) is specified
         std::size_t content_length = 0;
 
@@ -175,17 +180,18 @@ std::size_t HTTPRequestStreamParser::ParseBody()
             bytes_parsed = content_length;
             state_ = kDone;
         }
-    } else if (headers.find("Transfer-Encoding") != headers.end() && headers["Transfer-Encoding"] == "chunked") {
+    } else if (headers.find("Transfer-Encoding") != headers.end()) {
+        if (headers["Transfer-Encoding"] != "chunked")
+            throw std::invalid_argument("Unknown Transfer-Encoding");
+
         // If the body is sent in chunks
         do {
             tmp_bytes = ParseBodyChunk();
             bytes_parsed += tmp_bytes;
         } while (tmp_bytes && state_ != kDone);
-    } else {
-        throw std::invalid_argument(
-            "Invalid body transmission. Specify either Content-Length or set the Transfer-Enconding header to "
-            "\"chunked\"");
-    }
+    } else
+        state_ = kDone;
+
     return bytes_parsed;
 }
 

@@ -7,6 +7,7 @@
 #include <string>
 #include <ziapi/Logger.hpp>
 
+#include "http/HTTPRequestStreamParser.hpp"
 #include "http/SafeRequestQueue.hpp"
 #include "ziapi/Http.hpp"
 
@@ -51,6 +52,8 @@ private:
     bool should_close_;
 
     std::atomic_bool is_open_;
+
+    HTTPRequestStreamParser parser_stream_;
 };
 
 #include <memory>

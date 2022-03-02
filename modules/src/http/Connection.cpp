@@ -5,6 +5,7 @@
 #include <ziapi/Logger.hpp>
 
 #include "http/ConnectionManager.hpp"
+#include "http/ResponseToString.hpp"
 
 Connection::Connection(asio::ip::tcp::socket socket, SafeRequestQueue &requests, ConnectionManager &conn_manager)
     : socket_(std::move(socket)),
@@ -14,7 +15,8 @@ Connection::Connection(asio::ip::tcp::socket socket, SafeRequestQueue &requests,
       remote_endpoint_(),
       outbuf_(),
       should_close_(true),
-      is_open_(true)
+      is_open_(true),
+      parser_stream_{}
 {
     try {
         remote_endpoint_ = socket_.remote_endpoint();
@@ -26,22 +28,19 @@ void Connection::Start() { DoRead(); }
 
 void Connection::DoRead()
 {
-    socket_.async_read_some(asio::buffer(buffer_), [this, me = shared_from_this()](auto ec, auto) {
-        CallbackWrapper(ec, [this]() {
-            {
-                /// TODO: Do something with the buffer.
-                ziapi::http::Request req;
+    socket_.async_read_some(asio::buffer(buffer_), [this, me = shared_from_this()](auto ec, auto bytes_read) {
+        CallbackWrapper(ec, [this, &bytes_read]() {
+            parser_stream_.Feed(buffer_.data(), bytes_read);
+
+            if (parser_stream_.Done()) {
                 ziapi::http::Context ctx;
-                req.version = ziapi::http::Version::kV1_1;
-                req.target = "/index.html";
-                req.method = ziapi::http::method::kGet;
-                req.headers.emplace(ziapi::http::header::kAuthorization, "Basic diego:mdp");
-                req.body = "Hello world!";
                 ctx.emplace("client.socket.address",
                             std::make_any<std::string>(remote_endpoint_.address().to_string()));
                 ctx.emplace("client.socket.port", std::make_any<std::uint16_t>(remote_endpoint_.port()));
                 ctx.emplace("http.connection", std::make_any<std::string>("close"));
-                requests_.Push(std::make_pair(std::move(req), std::move(ctx)));
+
+                requests_.Push(std::make_pair(std::move(parser_stream_.GetRequest()), std::move(ctx)));
+                parser_stream_.Clear();
             }
             DoRead();
         });
@@ -59,16 +58,9 @@ void Connection::DoWrite()
     });
 }
 
-void Connection::Send(const ziapi::http::Response &)
+void Connection::Send(const ziapi::http::Response &r)
 {
-    {
-        /// TODO: Set oufbuf_ to the actual stringified response.
-        outbuf_ =
-            "HTTP/1.1 200 Ok\r\n"
-            "Cache-Control: no-cache\r\n"
-            "Content-Type: text/html\r\n"
-            "Connection: close\r\n\r\n";
-    }
+    outbuf_ = ResponseToString(r);
     DoWrite();
 }
 
