@@ -1,4 +1,4 @@
-#include "logger/Module.hpp"
+#include "Logger.hpp"
 
 #include "dylib/dylib.hpp"
 
