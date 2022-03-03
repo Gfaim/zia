@@ -57,7 +57,7 @@ jobs:
         run: conan install . -if build_tests --build=missing
 
       - name: Generate Tests Build File
-        run: cmake . -B build_tests -DUNIT_TESTS=ON
+        run: cmake . -B build_tests -DZIA_BUILD_TESTS=ON
 
       - name: Build Unit Tests
         run: cmake --build build_tests
@@ -93,7 +93,7 @@ jobs:
         run: conan install . -if build_tests --build=missing
 
       - name: Generate Tests Build File
-        run: cmake . -B build_tests -DUNIT_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+        run: cmake . -B build_tests -DZIA_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build Unit Tests
         run: cmake --build build_tests

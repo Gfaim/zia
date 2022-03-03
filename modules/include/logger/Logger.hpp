@@ -29,7 +29,7 @@ public:
     [[nodiscard]] bool ShouldPreProcess(const ziapi::http::Context &ctx,
                                         const ziapi::http::Request &req) const override;
 
-    void PostProcess(ziapi::http::Context &ctx, ziapi::http::Response &res) override;
+    void PostProcess(ziapi::http::Context &ctx, const ziapi::http::Request &req, ziapi::http::Response &res) override;
 
     void PreProcess(ziapi::http::Context &ctx, ziapi::http::Request &req) override;
 };

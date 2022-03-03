@@ -54,7 +54,7 @@ cmake --build build/
 
 # to build the tests
 conan install . -if build_tests --build=missing
-cmake . -B build_tests/ -DUNIT_TESTS=ON
+cmake . -B build_tests/ -DZIA_BUILD_TESTS=ON
 cmake --build build_tests/
 ./unit_tests
 ```

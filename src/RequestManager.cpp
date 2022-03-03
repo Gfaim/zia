@@ -75,7 +75,7 @@ void RequestManager::Worker(RequestManager *self)
         for (auto &ref_post : self->m_mods.post_processors) {
             auto &post = ref_post.get();
             if (post.ShouldPostProcess(ctx, req, res))
-                post.PostProcess(ctx, res);
+                post.PostProcess(ctx, req, res);
         }
         {
             std::scoped_lock lck(self->m_res_lock_guard);
