@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 #include "http/HTTPRequestStreamParser.hpp"
+#include "ziapi/Logger.hpp"
 
 bool HTTPRequestStreamParser::Done() { return state_ == kDone; }
 
@@ -152,7 +153,7 @@ std::size_t HTTPRequestStreamParser::NextWord(std::string &res, const std::strin
     if (end_of_word != buffer_.npos) {
         res = buffer_.substr(0, end_of_word);
         buffer_ = buffer_.substr(end_of_word + to_skip);
-        bytes_parsed = res.size();
+        bytes_parsed = res.size() + to_skip;
     }
     return bytes_parsed;
 }
