@@ -34,11 +34,8 @@ void Connection::DoRead()
         asio::buffer(buffer_), asio::bind_executor(strand_, [this, me = shared_from_this()](auto ec, auto bytes_read) {
             CallbackWrapper(ec, [this, &bytes_read, me]() {
                 try {
-                    std::string req(buffer_.data(), bytes_read);
-                    std::cout << req;
                     parser_stream_.Feed(buffer_.data(), bytes_read);
                 } catch (const std::exception &e) {
-                    ziapi::Logger::Debug("http error: ", e.what());
                     if (IsOpen()) {
                         conn_manager_.Close(me);
                     }
