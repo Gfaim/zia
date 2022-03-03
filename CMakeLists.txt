@@ -15,13 +15,13 @@ conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/modules/lib)
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR})
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR}/import)
 
 option(UNIT_TESTS "When sets to ON, build the unit tests" OFF)
 
-include(FetchZiAPI.cmake)
-include(FetchYamlCpp.cmake)
-include(FetchCXXopt.cmake)
+include(FetchZiAPI)
+include(FetchYamlCpp)
+include(FetchCXXopt)
 
 if(UNIT_TESTS)
     # The bin name of unit tests
