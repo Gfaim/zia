@@ -4,8 +4,8 @@ include(FetchContent)
 
 FetchContent_Declare(
     yamlcpp
-    GIT_REPOSITORY  https://github.com/jbeder/yaml-cpp
-    GIT_TAG         yaml-cpp-0.7.0
+    GIT_REPOSITORY  "https://github.com/jbeder/yaml-cpp"
+    GIT_TAG         "yaml-cpp-0.7.0"
     BUILD_COMMAND   ${CMAKE_COMMAND} -DYAML_CPP_BUILD_TESTS=OFF .
     COMMAND         ${CMAKE_COMMAND} --build .
     INSTALL_COMMAND ""

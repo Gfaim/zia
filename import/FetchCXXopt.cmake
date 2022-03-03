@@ -4,8 +4,8 @@ include(FetchContent)
 
 FetchContent_Declare(
     cxxopt
-    GIT_REPOSITORY  https://github.com/jarro2783/cxxopts.git
-    GIT_TAG         v3.0.0
+    GIT_REPOSITORY  "https://github.com/jarro2783/cxxopts"
+    GIT_TAG         "v3.0.0"
     INSTALL_COMMAND ""
     TEST_COMMAND    ""
 )
