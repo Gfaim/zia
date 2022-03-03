@@ -17,7 +17,7 @@
     return true;
 }
 
-void LoggerModule::PostProcess(ziapi::http::Context &ctx, ziapi::http::Response &res)
+void LoggerModule::PostProcess(ziapi::http::Context &ctx, const ziapi::http::Request &, ziapi::http::Response &res)
 {
     std::stringstream ss;
 
