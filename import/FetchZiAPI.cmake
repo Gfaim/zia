@@ -4,10 +4,9 @@ include(FetchContent)
 
 FetchContent_Declare(
     ziapi
-    GIT_REPOSITORY  "https://github.com/martin-olivier/ZiAPI"
-    GIT_TAG         "v4.0.0"
-    INSTALL_COMMAND ""
-    TEST_COMMAND    ""
+    GIT_REPOSITORY      "https://github.com/martin-olivier/ZiAPI"
+    GIT_TAG             "v4.0.0"
+    IGNORE_VARIABLES    ON
 )
 
 FetchContent_MakeAvailable(ziapi)

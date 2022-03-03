@@ -87,11 +87,11 @@ target_include_directories(${BIN} PRIVATE
 )
 
 # The lib links of the project
+target_link_libraries(${BIN} PRIVATE CONAN_PKG::asio)
+
 if(UNIX)
     target_link_libraries(${BIN} PRIVATE pthread dl)
 endif()
-
-target_link_libraries(${BIN} PRIVATE CONAN_PKG::asio)
 
 if(WIN32)
     target_link_libraries(${BIN} PUBLIC yaml-cppd)
