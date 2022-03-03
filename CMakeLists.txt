@@ -79,15 +79,10 @@ target_include_directories(${BIN} PUBLIC
 
 # The lib links of the project
 target_link_libraries(${BIN} PRIVATE CONAN_PKG::asio)
+target_link_libraries(${BIN} PUBLIC yaml-cpp)
 
 if(UNIX)
     target_link_libraries(${BIN} PRIVATE pthread dl)
-endif()
-
-if(WIN32)
-    target_link_libraries(${BIN} PUBLIC yaml-cpp)
-else()
-    target_link_libraries(${BIN} PUBLIC yaml-cpp)
 endif()
 
 add_subdirectory(modules)
