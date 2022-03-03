@@ -20,7 +20,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/import)
 option(UNIT_TESTS "When sets to ON, build the unit tests" OFF)
 
 include(FetchZiAPI)
-#include(FetchYamlCpp)
+include(FetchYamlCpp)
 include(FetchCXXopt)
 
 if(UNIT_TESTS)
