@@ -33,38 +33,32 @@ void Connection::DoRead()
     socket_.async_read_some(
         asio::buffer(buffer_), asio::bind_executor(strand_, [this, me = shared_from_this()](auto ec, auto bytes_read) {
             CallbackWrapper(ec, [this, &bytes_read, me]() {
-                // try {
-                //     std::string req(buffer_.data(), bytes_read);
-                //     std::cout << req;
-                //     parser_stream_.Feed(buffer_.data(), bytes_read);
-                // } catch (const std::exception &e) {
-                //     ziapi::Logger::Debug("http error: ", e.what());
-                //     if (IsOpen()) {
-                //         conn_manager_.Close(me);
-                //     }
-                //     return;
-                // }
-                // if (parser_stream_.Done()) {
-                ziapi::http::Context ctx;
-                ziapi::http::Request req;
-
-                req.target = "/src";
-                req.method = ziapi::http::method::kGet;
-                req.version = ziapi::http::Version::kV1_1;
-                req.headers.emplace("Connection", "close");
-                ctx.emplace("client.socket.address",
-                            std::make_any<std::string>(remote_endpoint_.address().to_string()));
-                ctx.emplace("client.socket.port", std::make_any<std::uint16_t>(remote_endpoint_.port()));
-                if (req.headers.find("Connection") == req.headers.end()) {
-                    ctx.emplace("http.connection", std::make_any<std::string>("close"));
-                } else {
-                    ctx.emplace("http.connection", std::make_any<std::string>(req.headers["end"]));
+                try {
+                    std::string req(buffer_.data(), bytes_read);
+                    std::cout << req;
+                    parser_stream_.Feed(buffer_.data(), bytes_read);
+                } catch (const std::exception &e) {
+                    ziapi::Logger::Debug("http error: ", e.what());
+                    if (IsOpen()) {
+                        conn_manager_.Close(me);
+                    }
+                    return;
                 }
-                requests_.Push(std::make_pair(std::move(req), std::move(ctx)));
-
-                // requests_.Push(std::make_pair(std::move(parser_stream_.GetRequest()), std::move(ctx)));
-                // parser_stream_.Clear();
-                // }
+                if (parser_stream_.Done()) {
+                    ziapi::http::Context ctx;
+                    auto req = parser_stream_.GetRequest();
+                    ctx.emplace("client.socket.address",
+                                std::make_any<std::string>(remote_endpoint_.address().to_string()));
+                    ctx.emplace("client.socket.port", std::make_any<std::uint16_t>(remote_endpoint_.port()));
+                    if (req.headers.find(ziapi::http::header::kConnection) == req.headers.end()) {
+                        ctx.emplace("http.connection", std::make_any<std::string>("close"));
+                    } else {
+                        ctx.emplace("http.connection",
+                                    std::make_any<std::string>(req.headers[ziapi::http::header::kConnection]));
+                    }
+                    requests_.Push(std::make_pair(std::move(parser_stream_.GetRequest()), std::move(ctx)));
+                    parser_stream_.Clear();
+                }
                 DoRead();
             });
         }));
