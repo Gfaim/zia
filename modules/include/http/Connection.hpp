@@ -7,7 +7,7 @@
 #include <string>
 #include <ziapi/Logger.hpp>
 
-#include "http/HTTPRequestStreamParser.hpp"
+#include "http/RequestStreamParser.hpp"
 #include "http/SafeRequestQueue.hpp"
 #include "ziapi/Http.hpp"
 
@@ -15,7 +15,8 @@ class ConnectionManager;
 
 class Connection : public std::enable_shared_from_this<Connection> {
 public:
-    Connection(asio::ip::tcp::socket socket, SafeRequestQueue &requests, ConnectionManager &conn_manager);
+    Connection(asio::io_context &ctx, asio::ip::tcp::socket socket, SafeRequestQueue &requests,
+               ConnectionManager &conn_manager);
 
     void Start();
 
@@ -37,6 +38,8 @@ private:
     template <typename CompletionHandler>
     void CallbackWrapper(std::error_code ec, CompletionHandler handler);
 
+    asio::io_context::strand strand_;
+
     asio::ip::tcp::socket socket_;
 
     SafeRequestQueue &requests_;
@@ -53,7 +56,7 @@ private:
 
     std::atomic_bool is_open_;
 
-    HTTPRequestStreamParser parser_stream_;
+    RequestStreamParser parser_stream_;
 };
 
 #include <memory>
@@ -69,7 +72,7 @@ public:
 
     void CloseAll();
 
-    void Dispatch(const std::pair<ziapi::http::Response, ziapi::http::Context> &res);
+    void Dispatch(std::pair<ziapi::http::Response, ziapi::http::Context> &res);
 
 private:
     std::mutex mu_;

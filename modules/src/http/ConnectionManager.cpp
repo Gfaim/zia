@@ -29,9 +29,14 @@ void ConnectionManager::CloseAll()
     connections_.clear();
 }
 
-void ConnectionManager::Dispatch(const std::pair<ziapi::http::Response, ziapi::http::Context> &res)
+void ConnectionManager::Dispatch(std::pair<ziapi::http::Response, ziapi::http::Context> &res)
 {
     std::scoped_lock sl(mu_);
+
+    if (res.first.headers.find(ziapi::http::header::kContentLength) == res.first.headers.end()) {
+        res.first.headers[ziapi::http::header::kContentLength] = std::to_string(res.first.body.size());
+    }
+
     for (auto &conn : connections_) {
         auto remote = conn->RemoteEndpoint();
         if (remote.address().to_string() == std::any_cast<std::string>(res.second.at("client.socket.address")) &&

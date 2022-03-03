@@ -7,8 +7,10 @@
 #include "http/ConnectionManager.hpp"
 #include "http/ResponseToString.hpp"
 
-Connection::Connection(asio::ip::tcp::socket socket, SafeRequestQueue &requests, ConnectionManager &conn_manager)
-    : socket_(std::move(socket)),
+Connection::Connection(asio::io_context &ctx, asio::ip::tcp::socket socket, SafeRequestQueue &requests,
+                       ConnectionManager &conn_manager)
+    : strand_(ctx),
+      socket_(std::move(socket)),
       requests_(requests),
       conn_manager_(conn_manager),
       buffer_(),
@@ -28,34 +30,50 @@ void Connection::Start() { DoRead(); }
 
 void Connection::DoRead()
 {
-    socket_.async_read_some(asio::buffer(buffer_), [this, me = shared_from_this()](auto ec, auto bytes_read) {
-        CallbackWrapper(ec, [this, &bytes_read]() {
-            parser_stream_.Feed(buffer_.data(), bytes_read);
-
-            if (parser_stream_.Done()) {
-                ziapi::http::Context ctx;
-                ctx.emplace("client.socket.address",
-                            std::make_any<std::string>(remote_endpoint_.address().to_string()));
-                ctx.emplace("client.socket.port", std::make_any<std::uint16_t>(remote_endpoint_.port()));
-                ctx.emplace("http.connection", std::make_any<std::string>("close"));
-
-                requests_.Push(std::make_pair(std::move(parser_stream_.GetRequest()), std::move(ctx)));
-                parser_stream_.Clear();
-            }
-            DoRead();
-        });
-    });
+    socket_.async_read_some(
+        asio::buffer(buffer_), asio::bind_executor(strand_, [this, me = shared_from_this()](auto ec, auto bytes_read) {
+            CallbackWrapper(ec, [this, &bytes_read, me]() {
+                try {
+                    std::string req(buffer_.data(), bytes_read);
+                    std::cout << req;
+                    parser_stream_.Feed(buffer_.data(), bytes_read);
+                } catch (const std::exception &e) {
+                    ziapi::Logger::Debug("http error: ", e.what());
+                    if (IsOpen()) {
+                        conn_manager_.Close(me);
+                    }
+                    return;
+                }
+                if (parser_stream_.Done()) {
+                    ziapi::http::Context ctx;
+                    auto req = parser_stream_.GetRequest();
+                    ctx.emplace("client.socket.address",
+                                std::make_any<std::string>(remote_endpoint_.address().to_string()));
+                    ctx.emplace("client.socket.port", std::make_any<std::uint16_t>(remote_endpoint_.port()));
+                    if (req.headers.find(ziapi::http::header::kConnection) == req.headers.end()) {
+                        ctx.emplace("http.connection", std::make_any<std::string>("close"));
+                    } else {
+                        ctx.emplace("http.connection",
+                                    std::make_any<std::string>(req.headers[ziapi::http::header::kConnection]));
+                    }
+                    requests_.Push(std::make_pair(std::move(parser_stream_.GetRequest()), std::move(ctx)));
+                    parser_stream_.Clear();
+                }
+                DoRead();
+            });
+        }));
 }
 
 void Connection::DoWrite()
 {
-    asio::async_write(socket_, asio::buffer(outbuf_), [this, me = shared_from_this()](auto ec, auto) {
-        CallbackWrapper(ec, [this, &me]() {
-            if (IsOpen() && should_close_) {
-                conn_manager_.Close(me);
-            }
-        });
-    });
+    asio::async_write(socket_, asio::buffer(outbuf_),
+                      asio::bind_executor(strand_, [this, me = shared_from_this()](auto ec, auto) {
+                          CallbackWrapper(ec, [this, &me]() {
+                              if (IsOpen() && should_close_) {
+                                  conn_manager_.Close(me);
+                              }
+                          });
+                      }));
 }
 
 void Connection::Send(const ziapi::http::Response &r)
