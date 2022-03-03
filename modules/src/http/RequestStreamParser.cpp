@@ -1,17 +1,15 @@
-#include "http/HTTPRequestStreamParser.hpp"
+#include "http/RequestStreamParser.hpp"
 
 #include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 
-#include "http/HTTPRequestStreamParser.hpp"
+bool RequestStreamParser::Done() { return state_ == kDone; }
 
-bool HTTPRequestStreamParser::Done() { return state_ == kDone; }
+const ziapi::http::Request &RequestStreamParser::GetRequest() { return output_; }
 
-const ziapi::http::Request &HTTPRequestStreamParser::GetRequest() { return output_; }
-
-void HTTPRequestStreamParser::Clear()
+void RequestStreamParser::Clear()
 {
     state_ = kMethod;
     last_chunk_size_ = -1;
@@ -19,7 +17,7 @@ void HTTPRequestStreamParser::Clear()
     output_ = ziapi::http::Request{};
 }
 
-std::size_t HTTPRequestStreamParser::Feed(char *data, std::size_t size)
+std::size_t RequestStreamParser::Feed(char *data, std::size_t size)
 {
     std::size_t parsed_bytes = 0;
     std::size_t total_parsed_bytes = 0;
@@ -40,7 +38,7 @@ std::size_t HTTPRequestStreamParser::Feed(char *data, std::size_t size)
                            : size;  // either returns whole size or bytes used for a request completion
 }
 
-std::size_t HTTPRequestStreamParser::ParseMethod(void)
+std::size_t RequestStreamParser::ParseMethod(void)
 {
     std::size_t bytes_parsed = NextWord(output_.method, " ");
 
@@ -53,7 +51,7 @@ std::size_t HTTPRequestStreamParser::ParseMethod(void)
     return bytes_parsed;
 }
 
-std::size_t HTTPRequestStreamParser::ParseTarget(void)
+std::size_t RequestStreamParser::ParseTarget(void)
 {
     std::size_t bytes_parsed = NextWord(output_.target, " ");
 
@@ -64,7 +62,7 @@ std::size_t HTTPRequestStreamParser::ParseTarget(void)
     return bytes_parsed;
 }
 
-std::size_t HTTPRequestStreamParser::ParseHeaderKey(void)
+std::size_t RequestStreamParser::ParseHeaderKey(void)
 {
     std::string key;
     std::size_t crlf_tmp = buffer_.find(CRLF);
@@ -86,7 +84,7 @@ std::size_t HTTPRequestStreamParser::ParseHeaderKey(void)
     return bytes_parsed;
 }
 
-std::size_t HTTPRequestStreamParser::ParseHeaderValue(void)
+std::size_t RequestStreamParser::ParseHeaderValue(void)
 {
     std::string value;
     std::string end_of_headers_delim = CRLF + CRLF;
@@ -114,7 +112,7 @@ std::size_t HTTPRequestStreamParser::ParseHeaderValue(void)
     return bytes_parsed;
 }
 
-std::size_t HTTPRequestStreamParser::ParseVersion(void)
+std::size_t RequestStreamParser::ParseVersion(void)
 {
     using Version = ziapi::http::Version;
 
@@ -143,7 +141,7 @@ std::size_t HTTPRequestStreamParser::ParseVersion(void)
     return bytes_parsed;
 }
 
-std::size_t HTTPRequestStreamParser::NextWord(std::string &res, const std::string &delim)
+std::size_t RequestStreamParser::NextWord(std::string &res, const std::string &delim)
 {
     std::size_t end_of_word = buffer_.find(delim);
     std::size_t bytes_parsed = 0;
@@ -157,7 +155,7 @@ std::size_t HTTPRequestStreamParser::NextWord(std::string &res, const std::strin
     return bytes_parsed;
 }
 
-std::size_t HTTPRequestStreamParser::ParseBody()
+std::size_t RequestStreamParser::ParseBody()
 {
     auto is_number = [](const std::string &s) {
         return std::all_of(s.begin(), s.end(), [](const char &c) { return std::isdigit(c); });
@@ -195,7 +193,7 @@ std::size_t HTTPRequestStreamParser::ParseBody()
     return bytes_parsed;
 }
 
-std::size_t HTTPRequestStreamParser::ParseBodyChunk()
+std::size_t RequestStreamParser::ParseBodyChunk()
 {
     auto is_number = [](const std::string &s) {
         return std::all_of(s.begin(), s.end(), [](const char &c) { return std::isdigit(c); });

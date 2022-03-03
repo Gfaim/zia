@@ -7,9 +7,9 @@
 
 /// Stateful parser for HTTP 1.1 requests messages.
 /// Feed bytes to the parser till a request is formed.
-class HTTPRequestStreamParser {
+class RequestStreamParser {
 public:
-    HTTPRequestStreamParser() = default;
+    RequestStreamParser() = default;
 
     /// Feed bytes to the parser.
     /// @throws Throws upon parsing failure.
@@ -37,7 +37,7 @@ private:
     std::size_t ParseBody();
 
     // Function pointer type that returns true if the current state has finished being parsed
-    using ParseHandler = std::size_t (HTTPRequestStreamParser::*)(void);
+    using ParseHandler = std::size_t (RequestStreamParser::*)(void);
 
     enum RequestState : unsigned short {
         kMethod,
@@ -51,9 +51,9 @@ private:
     } state_{};
 
     ParseHandler parsers_[RequestState::kCount - 1] = {
-        &HTTPRequestStreamParser::ParseMethod,      &HTTPRequestStreamParser::ParseTarget,
-        &HTTPRequestStreamParser::ParseVersion,     &HTTPRequestStreamParser::ParseHeaderKey,
-        &HTTPRequestStreamParser::ParseHeaderValue, &HTTPRequestStreamParser::ParseBody};
+        &RequestStreamParser::ParseMethod,      &RequestStreamParser::ParseTarget,
+        &RequestStreamParser::ParseVersion,     &RequestStreamParser::ParseHeaderKey,
+        &RequestStreamParser::ParseHeaderValue, &RequestStreamParser::ParseBody};
 
     std::size_t ParseBodyChunk();
     int last_chunk_size_ = -1;
