@@ -57,7 +57,6 @@ set(SOURCES
 set(TEST_SOURCES
     tests/YamlParserString.cpp
     tests/YamlParser.cpp
-    tests/test.cpp
     tests/queues.cpp
 )
 
