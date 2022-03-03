@@ -15,7 +15,8 @@ class ConnectionManager;
 
 class Connection : public std::enable_shared_from_this<Connection> {
 public:
-    Connection(asio::ip::tcp::socket socket, SafeRequestQueue &requests, ConnectionManager &conn_manager);
+    Connection(asio::io_context &ctx, asio::ip::tcp::socket socket, SafeRequestQueue &requests,
+               ConnectionManager &conn_manager);
 
     void Start();
 
@@ -36,6 +37,8 @@ private:
 
     template <typename CompletionHandler>
     void CallbackWrapper(std::error_code ec, CompletionHandler handler);
+
+    asio::io_context::strand strand_;
 
     asio::ip::tcp::socket socket_;
 

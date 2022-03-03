@@ -28,4 +28,4 @@ void HttpModule::Terminate()
     }
 }
 
-DYLIB_API ziapi::IModule *LoadZiaModule() { return new HttpModule(1); }
+DYLIB_API ziapi::IModule *LoadZiaModule() { return new HttpModule(10); }

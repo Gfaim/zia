@@ -38,7 +38,8 @@ void Server::DoAccept()
             return;
         }
         if (!ec) {
-            conn_manager_.Add(std::make_shared<Connection>(std::move(socket), requests_, conn_manager_));
+            conn_manager_.Add(std::make_shared<Connection>(ctx_, std::move(socket),
+                                                           requests_, conn_manager_));
         }
         DoAccept();
     });
