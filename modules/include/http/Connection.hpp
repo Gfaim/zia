@@ -72,7 +72,7 @@ public:
 
     void CloseAll();
 
-    void Dispatch(const std::pair<ziapi::http::Response, ziapi::http::Context> &res);
+    void Dispatch(std::pair<ziapi::http::Response, ziapi::http::Context> &res);
 
 private:
     std::mutex mu_;
