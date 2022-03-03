@@ -19,10 +19,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR})
 
 option(UNIT_TESTS "When sets to ON, build the unit tests" OFF)
 
+include(FetchZiAPI.cmake)
+include(FetchYamlCpp.cmake)
+include(FetchCXXopt.cmake)
+
 if(UNIT_TESTS)
     # The bin name of unit tests
     set(BIN unit_tests)
-    include(import/FetchGoogleTest.cmake)
+    include(FetchGoogleTest.cmake)
 else()
     # The bin name of the project
     set(BIN zia)
@@ -75,8 +79,8 @@ endif()
 
 # The include path of the project
 target_include_directories(${BIN} PRIVATE
-include
-CONAN_INCLUDE_DIRS_ASIO
+    include
+    CONAN_INCLUDE_DIRS_ASIO
 )
 target_include_directories(${BIN} PRIVATE
     src
@@ -89,53 +93,10 @@ endif()
 
 target_link_libraries(${BIN} PRIVATE CONAN_PKG::asio)
 
-include(ExternalProject)
-
-ExternalProject_Add(
-    ziapi
-    GIT_REPOSITORY  https://github.com/martin-olivier/ZiAPI.git
-    GIT_TAG         v4.0.0
-    INSTALL_COMMAND ""
-    TEST_COMMAND    ""
-)
-
-ExternalProject_Add(
-    libyaml-cpp
-    GIT_REPOSITORY  https://github.com/jbeder/yaml-cpp
-    GIT_TAG         yaml-cpp-0.7.0
-    BUILD_COMMAND   ${CMAKE_COMMAND} -DYAML_CPP_BUILD_TESTS=OFF .
-    COMMAND         ${CMAKE_COMMAND} --build .
-    INSTALL_COMMAND ""
-    TEST_COMMAND    ""
-)
-
-ExternalProject_Add(
-    cxxopt
-    GIT_REPOSITORY  https://github.com/jarro2783/cxxopts.git
-    GIT_TAG         v3.0.0
-    INSTALL_COMMAND ""
-    TEST_COMMAND    ""
-)
-
-add_dependencies(${BIN} libyaml-cpp)
-add_dependencies(${BIN} ziapi)
-add_dependencies(${BIN} cxxopt)
-
-ExternalProject_Get_Property(libyaml-cpp INSTALL_DIR)
-include_directories(${INSTALL_DIR}/src/libyaml-cpp/include)
 if(WIN32)
-    target_link_directories(${BIN} PUBLIC ${INSTALL_DIR}/src/libyaml-cpp-build/Debug)
     target_link_libraries(${BIN} PUBLIC yaml-cppd)
 else()
-    target_link_directories(${BIN} PUBLIC ${INSTALL_DIR}/src/libyaml-cpp-build)
     target_link_libraries(${BIN} PUBLIC yaml-cpp)
 endif()
-
-ExternalProject_Get_Property(cxxopt SOURCE_DIR)
-include_directories(${SOURCE_DIR}/include)
-
-ExternalProject_Get_Property(ziapi SOURCE_DIR)
-include_directories(${SOURCE_DIR}/include)
-
 
 add_subdirectory(modules)
