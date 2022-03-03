@@ -26,7 +26,7 @@ include(FetchCXXopt)
 if(UNIT_TESTS)
     # The bin name of unit tests
     set(BIN unit_tests)
-    include(FetchGoogleTest.cmake)
+    include(FetchGoogleTest)
 else()
     # The bin name of the project
     set(BIN zia)
