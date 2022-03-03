@@ -72,7 +72,7 @@ else()
 endif()
 
 # The include path of the project
-target_include_directories(${BIN} PRIVATE
+target_include_directories(${BIN} PUBLIC
     include
     CONAN_INCLUDE_DIRS_ASIO
 )
@@ -85,7 +85,7 @@ if(UNIX)
 endif()
 
 if(WIN32)
-    target_link_libraries(${BIN} PUBLIC yaml-cppd)
+    target_link_libraries(${BIN} PUBLIC yaml-cpp)
 else()
     target_link_libraries(${BIN} PUBLIC yaml-cpp)
 endif()

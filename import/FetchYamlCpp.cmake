@@ -8,7 +8,7 @@ FetchContent_Declare(
     GIT_TAG         "yaml-cpp-0.7.0"
 )
 
-set(YAML_CPP_BUILD_TESTS OFF)
+set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(yamlcpp)
 include_directories(${yamlcpp_SOURCE_DIR}/include)
 
