@@ -4,11 +4,11 @@ include(FetchContent)
 
 FetchContent_Declare(
     yamlcpp
-    GIT_REPOSITORY      "https://github.com/jbeder/yaml-cpp"
-    GIT_TAG             "yaml-cpp-0.7.0"
+    GIT_REPOSITORY  "https://github.com/jbeder/yaml-cpp"
+    GIT_TAG         "yaml-cpp-0.7.0"
 )
 
-set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(YAML_CPP_BUILD_TESTS OFF)
 FetchContent_MakeAvailable(yamlcpp)
 include_directories(${yamlcpp_SOURCE_DIR}/include)
 

@@ -21,7 +21,7 @@ option(ZIA_BUILD_TESTS "When sets to ON, build the unit tests" OFF)
 
 include(FetchZiAPI)
 include(FetchYamlCpp)
-include(FetchCXXopt)
+include(FetchCXXopts)
 
 if(ZIA_BUILD_TESTS)
     # The bin name of unit tests
@@ -62,28 +62,19 @@ set(TEST_SOURCES
 )
 
 if(ZIA_BUILD_TESTS)
-    add_executable(${BIN}
-        ${SOURCES}
-        ${TEST_SOURCES}
-    )
+    add_executable(${BIN} ${SOURCES} ${TEST_SOURCES})
     enable_testing()
     include(GoogleTest)
     gtest_discover_tests(${BIN} PROPERTIES TIMEOUT 600)
     target_link_libraries(${BIN} PRIVATE gtest_main)
 else()
-    add_executable(${BIN}
-        ${MAIN}
-        ${SOURCES}
-    )
+    add_executable(${BIN} ${MAIN} ${SOURCES})
 endif()
 
 # The include path of the project
 target_include_directories(${BIN} PRIVATE
     include
     CONAN_INCLUDE_DIRS_ASIO
-)
-target_include_directories(${BIN} PRIVATE
-    src
 )
 
 # The lib links of the project
