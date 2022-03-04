@@ -7,4 +7,4 @@ modules:
     tls:
       foo: bar
     php-cgi:
-      foo: bar
+      root: "./php/"
