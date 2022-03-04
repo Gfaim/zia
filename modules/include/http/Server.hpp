@@ -1,0 +1,40 @@
+#pragma once
+
+#include <asio.hpp>
+#include <condition_variable>
+#include <ziapi/Http.hpp>
+
+#include "ConnectionManager.hpp"
+#include "SafeRequestQueue.hpp"
+
+class Server {
+public:
+    Server(ziapi::http::IRequestOutputQueue &requests, ziapi::http::IResponseInputQueue &responses);
+
+    void Start(unsigned int num_threads);
+
+    void Stop();
+
+private:
+    void AcceptConnections();
+
+    void DoAccept();
+
+    void StartThreadPool(unsigned int num_threads);
+
+    asio::io_context ctx_;
+
+    asio::io_context::strand strand_;
+
+    asio::ip::tcp::acceptor acceptor_;
+
+    ConnectionManager conn_manager_;
+
+    std::vector<std::thread> thread_pool_;
+
+    std::condition_variable must_stop_cv_;
+
+    SafeRequestQueue requests_;
+
+    ziapi::http::IResponseInputQueue &responses_;
+};

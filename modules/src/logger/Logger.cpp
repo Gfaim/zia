@@ -25,9 +25,6 @@ void LoggerModule::PostProcess(ziapi::http::Context &ctx, const ziapi::http::Req
     ss << std::to_string((int)res.status_code) << ": " << res.reason << " ("
        << std::any_cast<std::string>(ctx["method"]) << " " << std::any_cast<std::string>(ctx["target"]) << ", "
        << std::setprecision(2) << difftime(std::time(nullptr), std::any_cast<time_t>(ctx["timestamp"])) << "s)";
-    if (!res.body.empty()) {
-        ss << std::endl << "BODY:\n\"" << res.body << "\"";
-    }
     if ((int)res.status_code < 300) {
         ziapi::Logger::Info(ss.str());
     } else if ((int)res.status_code < 400) {

@@ -1,15 +1,19 @@
 #pragma once
 
+#include <asio.hpp>
 #include <atomic>
 #include <condition_variable>
 #include <iostream>
+#include <optional>
 #include <ziapi/Module.hpp>
+
+#include "Server.hpp"
 
 class HttpModule : public ziapi::INetworkModule {
 public:
-    HttpModule() : must_stop_{false}, has_stopped_{} {}
+    HttpModule(unsigned int num_threads);
 
-    void Init(const ziapi::config::Node &) override {}
+    void Init(const ziapi::config::Node &) override;
 
     [[nodiscard]] ziapi::Version GetVersion() const noexcept override { return ziapi::Version(1, 0, 0); }
 
@@ -28,7 +32,7 @@ private:
 
     static const char *kModuleName;
 
-    std::atomic<bool> must_stop_;
+    unsigned int num_threads_;
 
-    std::condition_variable has_stopped_;
+    std::optional<Server> server_;
 };
