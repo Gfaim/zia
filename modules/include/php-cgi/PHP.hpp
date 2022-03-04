@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ACGI.hpp"
+#include "../cgi/ACGI.hpp"
 
 class PHPCGI : public ACGI {
 public:
