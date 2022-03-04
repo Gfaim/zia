@@ -1,4 +1,4 @@
-#include "http/SafeRequestQueue.hpp"
+#include "SafeRequestQueue.hpp"
 
 SafeRequestQueue::SafeRequestQueue(ziapi::http::IRequestOutputQueue &queue) : queue_(queue) {}
 

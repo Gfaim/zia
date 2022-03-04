@@ -1,11 +1,11 @@
-#include "http/Connection.hpp"
+#include "Connection.hpp"
 
 #include <any>
 #include <asio.hpp>
 #include <ziapi/Logger.hpp>
 
-#include "http/ConnectionManager.hpp"
-#include "http/ResponseToString.hpp"
+#include "ConnectionManager.hpp"
+#include "ResponseToString.hpp"
 
 Connection::Connection(asio::io_context &ctx, asio::ip::tcp::socket socket, SafeRequestQueue &requests,
                        ConnectionManager &conn_manager)

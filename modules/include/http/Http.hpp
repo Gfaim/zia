@@ -7,7 +7,7 @@
 #include <optional>
 #include <ziapi/Module.hpp>
 
-#include "http/Server.hpp"
+#include "Server.hpp"
 
 class HttpModule : public ziapi::INetworkModule {
 public:

@@ -5,11 +5,11 @@
 #include <atomic>
 #include <memory>
 #include <string>
+#include <ziapi/Http.hpp>
 #include <ziapi/Logger.hpp>
 
-#include "http/RequestStreamParser.hpp"
-#include "http/SafeRequestQueue.hpp"
-#include "ziapi/Http.hpp"
+#include "RequestStreamParser.hpp"
+#include "SafeRequestQueue.hpp"
 
 class ConnectionManager;
 

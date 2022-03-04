@@ -4,8 +4,8 @@
 #include <condition_variable>
 #include <ziapi/Http.hpp>
 
-#include "http/ConnectionManager.hpp"
-#include "http/SafeRequestQueue.hpp"
+#include "ConnectionManager.hpp"
+#include "SafeRequestQueue.hpp"
 
 class Server {
 public:
