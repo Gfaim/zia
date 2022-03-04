@@ -79,10 +79,11 @@ protected:
     }
 
     // Execute the cgi command and returns the headers and body as a string pair
-#ifdef CGI_WIN
     std::pair<std::string, std::string> ExecuteCGICommand(const http::Request &req, const http::Context &ctx)
     {
+        auto escape = [](const std::string &str) { return std::regex_replace(str, std::regex("\""), "\\\""); };
         auto envMap = GenerateEnv(req, ctx);
+#ifdef CGI_WIN
         std::vector<char> env;
         HANDLE child_output_w = NULL;
         HANDLE child_output_r = NULL;
@@ -121,15 +122,15 @@ protected:
         env += '\0';
 
         if (!CreateProcess(NULL,
-                       _bin_path.data(),  // command line
-                       NULL,              // process security attributes
-                       NULL,              // primary thread security attributes
-                       TRUE,              // handles are inherited
-                       0,                 // creation flags
-                       env.data(),        // use parent's environment
-                       NULL,              // use parent's current directory
-                       &start_info,       // STARTUPINFO pointer
-                       &proc_info) {      // receives PROCESS_INFORMATION
+                        (std::string("echo \"") + escape(req.body) + "\" | " + _bin_path).data(),  // command line
+                        NULL,              // process security attributes
+                        NULL,              // primary thread security attributes
+                        TRUE,              // handles are inherited
+                        0,                 // creation flags
+                        env.data(),        // use parent's environment
+                        NULL,              // use parent's current directory
+                        &start_info,       // STARTUPINFO pointer
+                        &proc_info) {      // receives PROCESS_INFORMATION
             return {};
         } else {
             CloseHandle(proc_info.hProcess);
@@ -140,18 +141,14 @@ protected:
     }
 
 #else
+        std::string command;
 
-    std::pair<std::string, std::string> ExecuteCGICommand(const http::Request &req, const http::Context &ctx)
-    {
-        std::unordered_map<std::string, std::string> env = GenerateEnv(req, ctx);
-        std::string command = "env -i ";
+        command += "echo \"" + escape(req.body) + "\"" + " | env -i ";
 
-        for (const auto &[key, value] : env) {
-            command += key + "=\"" + std::regex_replace(value, std::regex("\""), "\\\"") + "\" ";
+        for (const auto &[key, value] : envMap) {
+            command += key + "=\"" + escape(value) + "\" ";
         }
         command += _bin_path;
-
-        Logger::Info(command);
 
         unique_ptr_pipe_t command_pipe(POPEN(command.c_str(), "r"), PCLOSE);
 
@@ -312,9 +309,9 @@ protected:
         return env;
     }
 
-    std::vector<std::string> headers_env{"Content-Length", "Content-Type",    "Accept", "Accept-Encoding",
-                                         "Accept-Charset", "Accept-Language", "Host",   "Referer",
-                                         "User-Agent"};
+    std::vector<std::string> headers_env{"Content-Length", "Content-Type",    "Accept",        "Accept-Encoding",
+                                         "Accept-Charset", "Accept-Language", "Host",          "From",
+                                         "Referer",        "User-Agent",      "Cache-Control", "Referer"};
     std::string _bin_path{};
     std::string _root = "/var/www/";
     std::string _version{};
