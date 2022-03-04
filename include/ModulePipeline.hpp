@@ -4,6 +4,8 @@
 #include <memory>
 #include <vector>
 
+#include "ModuleAggregate.hpp"
+#include "RequestManager.hpp"
 #include "TSRequestOutputQueue.hpp"
 #include "TSResponseInputQueue.hpp"
 #include "ziapi/Http.hpp"
@@ -11,28 +13,14 @@
 
 namespace zia {
 
-/// Aggregation of all the modules of a pipeline.
-struct ModuleAggregate {
-    ziapi::INetworkModule &network;
-
-    std::vector<std::reference_wrapper<ziapi::IPreProcessorModule>> pre_processors;
-
-    std::vector<std::reference_wrapper<ziapi::IHandlerModule>> handlers;
-
-    std::vector<std::reference_wrapper<ziapi::IPostProcessorModule>> post_processors;
-
-    /// Create a module bundle from a vector of modules by dynamically casting
-    /// each module into the right category.
-    static ModuleAggregate From(const std::vector<std::unique_ptr<ziapi::IModule>> &modules);
-};
-
 /// Manages an execution context for requests and responses.
 class ModulePipeline {
 public:
     /// Constructs the object from all the modules that make up the pipeline.
     /// If there are multiple INetworkModules in the modules vector, this
     /// constructor will throw.
-    ModulePipeline(const ziapi::config::Node &cfg, const std::vector<std::unique_ptr<ziapi::IModule>> &modules);
+    ModulePipeline(const ziapi::config::Node &cfg, const std::vector<std::unique_ptr<ziapi::IModule>> &modules,
+                   int nb_threads);
 
     ModulePipeline(const ModulePipeline &) = delete;
     ModulePipeline &operator=(const ModulePipeline &) = delete;
@@ -47,6 +35,7 @@ public:
 
 private:
     ModuleAggregate modules_;
+    RequestManager req_manager_;
     std::thread network_thread_;
     zia::TSRequestOutputQueue requests_;
     zia::TSResponseInputQueue responses_;

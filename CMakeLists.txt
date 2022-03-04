@@ -15,14 +15,18 @@ conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/modules/lib)
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR})
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/import)
 
-option(UNIT_TESTS "When sets to ON, build the unit tests" OFF)
+option(ZIA_BUILD_TESTS "When sets to ON, build the unit tests" OFF)
 
-if(UNIT_TESTS)
+include(FetchZiAPI)
+include(FetchYamlCpp)
+include(FetchCXXopts)
+
+if(ZIA_BUILD_TESTS)
     # The bin name of unit tests
     set(BIN unit_tests)
-    include(import/FetchGoogleTest.cmake)
+    include(FetchGoogleTest)
 else()
     # The bin name of the project
     set(BIN zia)
@@ -46,96 +50,38 @@ set(SOURCES
     src/ModulePipeline.cpp
     src/ConfigLoader.cpp
     src/CLI.cpp
-    # fill here
+    src/RequestManager.cpp
 )
 
 # The list of tests source files
 set(TEST_SOURCES
     tests/YamlParserString.cpp
     tests/YamlParser.cpp
-    tests/test.cpp
     tests/queues.cpp
 )
 
-if(UNIT_TESTS)
-    add_executable(${BIN}
-        ${SOURCES}
-        ${TEST_SOURCES}
-    )
+if(ZIA_BUILD_TESTS)
+    add_executable(${BIN} ${SOURCES} ${TEST_SOURCES})
     enable_testing()
     include(GoogleTest)
-    gtest_discover_tests(${BIN} PROPERTIES TIMEOUT 600)
+    gtest_discover_tests(${BIN} PROPERTIES TIMEOUT 1200)
     target_link_libraries(${BIN} PRIVATE gtest_main)
 else()
-    add_executable(${BIN}
-        ${MAIN}
-        ${SOURCES}
-    )
+    add_executable(${BIN} ${MAIN} ${SOURCES})
 endif()
 
 # The include path of the project
-target_include_directories(${BIN} PRIVATE
-include
-CONAN_INCLUDE_DIRS_ASIO
-)
-target_include_directories(${BIN} PRIVATE
-    src
+target_include_directories(${BIN} PUBLIC
+    include
+    CONAN_INCLUDE_DIRS_ASIO
 )
 
 # The lib links of the project
+target_link_libraries(${BIN} PRIVATE CONAN_PKG::asio)
+target_link_libraries(${BIN} PUBLIC yaml-cpp)
+
 if(UNIX)
     target_link_libraries(${BIN} PRIVATE pthread dl)
 endif()
-
-target_link_libraries(${BIN} PRIVATE CONAN_PKG::asio)
-
-include(ExternalProject)
-
-ExternalProject_Add(
-    ziapi
-    GIT_REPOSITORY  https://github.com/martin-olivier/ZiAPI.git
-    GIT_TAG         v4.0.0
-    INSTALL_COMMAND ""
-    TEST_COMMAND    ""
-)
-
-ExternalProject_Add(
-    libyaml-cpp
-    GIT_REPOSITORY  https://github.com/jbeder/yaml-cpp
-    GIT_TAG         yaml-cpp-0.7.0
-    BUILD_COMMAND   ${CMAKE_COMMAND} -DYAML_CPP_BUILD_TESTS=OFF .
-    COMMAND         ${CMAKE_COMMAND} --build .
-    INSTALL_COMMAND ""
-    TEST_COMMAND    ""
-)
-
-ExternalProject_Add(
-    cxxopt
-    GIT_REPOSITORY  https://github.com/jarro2783/cxxopts.git
-    GIT_TAG         v3.0.0
-    INSTALL_COMMAND ""
-    TEST_COMMAND    ""
-)
-
-add_dependencies(${BIN} libyaml-cpp)
-add_dependencies(${BIN} ziapi)
-add_dependencies(${BIN} cxxopt)
-
-ExternalProject_Get_Property(libyaml-cpp INSTALL_DIR)
-include_directories(${INSTALL_DIR}/src/libyaml-cpp/include)
-if(WIN32)
-    target_link_directories(${BIN} PUBLIC ${INSTALL_DIR}/src/libyaml-cpp-build/Debug)
-    target_link_libraries(${BIN} PUBLIC yaml-cppd)
-else()
-    target_link_directories(${BIN} PUBLIC ${INSTALL_DIR}/src/libyaml-cpp-build)
-    target_link_libraries(${BIN} PUBLIC yaml-cpp)
-endif()
-
-ExternalProject_Get_Property(cxxopt SOURCE_DIR)
-include_directories(${SOURCE_DIR}/include)
-
-ExternalProject_Get_Property(ziapi SOURCE_DIR)
-include_directories(${SOURCE_DIR}/include)
-
 
 add_subdirectory(modules)

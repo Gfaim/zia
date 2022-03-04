@@ -1,4 +1,4 @@
-#include "directory_listing/Module.hpp"
+#include "DirectoryListing.hpp"
 
 #include "dylib/dylib.hpp"
 
