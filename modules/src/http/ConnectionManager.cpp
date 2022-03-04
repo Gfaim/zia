@@ -34,9 +34,9 @@ void ConnectionManager::Dispatch(std::pair<ziapi::http::Response, ziapi::http::C
     std::scoped_lock sl(mu_);
 
     // // If content length has not been calculated then set it. (some clients fail when content length is not set.)
-    // if (res.first.headers.find(ziapi::http::header::kContentLength) == res.first.headers.end()) {
-    //     res.first.headers[ziapi::http::header::kContentLength] = std::to_string(res.first.body.size());
-    // }
+    if (res.first.headers.find(ziapi::http::header::kContentLength) == res.first.headers.end()) {
+        res.first.headers[ziapi::http::header::kContentLength] = std::to_string(res.first.body.size());
+    }
     // If connection header is missing from the response then set it to close.
     if (res.first.headers.find(ziapi::http::header::kConnection) == res.first.headers.end()) {
         res.first.headers[ziapi::http::header::kConnection] = "close";

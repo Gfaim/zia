@@ -1,7 +1,7 @@
+#include "http/ResponseToString.hpp"
+
 #include <iomanip>
 #include <sstream>
-
-#include "http/ResponseToString.hpp"
 
 std::string ResponseToString(const ziapi::http::Response &r)
 {
