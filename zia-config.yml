@@ -1,10 +1,10 @@
 modules:
   locations:
     - ./modules
+  http:
+    enableTls: false
   config:
     directoryListing:
       root: "./"
-    tls:
-      foo: bar
     php-cgi:
       foo: bar
