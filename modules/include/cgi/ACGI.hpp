@@ -6,6 +6,7 @@
 #include <iostream>
 #include <memory>
 #include <regex>
+#include <sstream>
 #include <unordered_map>
 
 #include "ziapi/Config.hpp"
