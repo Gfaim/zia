@@ -8,15 +8,14 @@
 #include <ziapi/Http.hpp>
 #include <ziapi/Logger.hpp>
 
+#include "ConnectionManager.hpp"
 #include "RequestStreamParser.hpp"
 #include "SafeRequestQueue.hpp"
-
-class ConnectionManager;
 
 class Connection : public std::enable_shared_from_this<Connection> {
 public:
     Connection(asio::io_context &ctx, asio::ip::tcp::socket socket, SafeRequestQueue &requests,
-               ConnectionManager &conn_manager);
+               ConnectionManager<Connection> &conn_manager);
 
     void Start();
 
@@ -36,7 +35,16 @@ private:
     void DoWrite();
 
     template <typename CompletionHandler>
-    void CallbackWrapper(std::error_code ec, CompletionHandler handler);
+    void CallbackWrapper(std::error_code ec, CompletionHandler handler)
+    {
+        if (ec) {
+            if (IsOpen()) {
+                conn_manager_.Close(shared_from_this());
+            }
+            return;
+        }
+        handler();
+    }
 
     asio::io_context::strand strand_;
 
@@ -44,7 +52,7 @@ private:
 
     SafeRequestQueue &requests_;
 
-    ConnectionManager &conn_manager_;
+    ConnectionManager<Connection> &conn_manager_;
 
     std::array<char, 4096> buffer_;
 
@@ -58,36 +66,3 @@ private:
 
     RequestStreamParser parser_stream_;
 };
-
-#include <memory>
-#include <utility>
-
-class ConnectionManager {
-public:
-    using SharedConnection = std::shared_ptr<Connection>;
-
-    void Add(SharedConnection conn);
-
-    void Close(SharedConnection conn);
-
-    void CloseAll();
-
-    void Dispatch(std::pair<ziapi::http::Response, ziapi::http::Context> &res);
-
-private:
-    std::mutex mu_;
-
-    std::vector<SharedConnection> connections_;
-};
-
-template <typename CompletionHandler>
-void Connection::CallbackWrapper(std::error_code ec, CompletionHandler handler)
-{
-    if (ec) {
-        if (IsOpen()) {
-            conn_manager_.Close(shared_from_this());
-        }
-        return;
-    }
-    handler();
-}

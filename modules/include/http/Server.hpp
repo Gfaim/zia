@@ -4,6 +4,7 @@
 #include <condition_variable>
 #include <ziapi/Http.hpp>
 
+#include "Connection.hpp"
 #include "ConnectionManager.hpp"
 #include "SafeRequestQueue.hpp"
 
@@ -28,7 +29,7 @@ private:
 
     asio::ip::tcp::acceptor acceptor_;
 
-    ConnectionManager conn_manager_;
+    ConnectionManager<Connection> conn_manager_;
 
     std::vector<std::thread> thread_pool_;
 

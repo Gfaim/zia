@@ -36,7 +36,7 @@ public:
         connections_.clear();
     }
 
-    void Dispatch(ziapi::http::IRequestOutputQueue::ValueType &res)
+    void Dispatch(ziapi::http::IResponseInputQueue::ValueType &res)
     {
         std::scoped_lock sl(mu_);
 

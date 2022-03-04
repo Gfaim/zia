@@ -8,7 +8,7 @@
 #include "ResponseToString.hpp"
 
 Connection::Connection(asio::io_context &ctx, asio::ip::tcp::socket socket, SafeRequestQueue &requests,
-                       ConnectionManager &conn_manager)
+                       ConnectionManager<Connection> &conn_manager)
     : strand_(ctx),
       socket_(std::move(socket)),
       requests_(requests),
