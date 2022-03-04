@@ -68,8 +68,10 @@ void RequestManager::Worker(RequestManager *self)
 
         for (auto &ref_handler : self->m_mods.handlers) {
             auto &handler = ref_handler.get();
-            if (handler.ShouldHandle(ctx, req))
+            if (handler.ShouldHandle(ctx, req)) {
                 handler.Handle(ctx, req, res);
+                break;
+            }
         }
 
         for (auto &ref_post : self->m_mods.post_processors) {
