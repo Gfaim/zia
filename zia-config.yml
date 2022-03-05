@@ -1,10 +1,12 @@
+locations:
+  - ./modules
 modules:
-  locations:
-    - ./modules
-  config:
-    directoryListing:
-      root: "./"
-    tls:
-      foo: bar
-    php-cgi:
-      root: "./php/"
+  http:
+    ssl: 
+      enable: true
+      certificatePath: data/ssl/localhost.pem
+      keyPath: data/ssl/localhost.key
+  directoryListing:
+    root: "./"
+  php-cgi:
+    root: "./"

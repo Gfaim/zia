@@ -7,7 +7,7 @@
 
 class DirectoryListingModule : public ziapi::IHandlerModule {
 public:
-    DirectoryListingModule() : root_("") {}
+    DirectoryListingModule() : root_("./") {}
 
     void Init(const ziapi::config::Node &cfg) override;
 

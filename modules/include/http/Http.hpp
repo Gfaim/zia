@@ -1,10 +1,13 @@
 #pragma once
 
+#include <any>
 #include <asio.hpp>
 #include <atomic>
 #include <condition_variable>
+#include <filesystem>
 #include <iostream>
 #include <optional>
+#include <variant>
 #include <ziapi/Module.hpp>
 
 #include "Server.hpp"
@@ -34,5 +37,13 @@ private:
 
     unsigned int num_threads_;
 
+    bool enable_tls_;
+
+    std::filesystem::path cert_;
+
+    std::filesystem::path key_;
+
     std::optional<Server> server_;
+
+    std::optional<TlsServer> tls_server_;
 };

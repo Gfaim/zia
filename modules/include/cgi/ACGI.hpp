@@ -37,12 +37,11 @@ protected:
 public:
     void Init(const config::Node &cfg)
     {
-        auto &dict = cfg["modules"]["config"][GetName()].AsDict();
-        const auto get_cfg_string = [&cfg, &dict, this](const std::string &key, std::string &variable) {
+        const auto get_cfg_string = [&cfg, this](const std::string &key, std::string &variable) {
             try {
-                if (dict.find(key) != dict.end()) {
-                    variable = dict.at(key)->AsString();
-                }
+                auto &dict = cfg["modules"][GetName()].AsDict();
+
+                variable = dict.at(key)->AsString();
             } catch (const std::exception &) {
                 Logger::Warning(std::string(GetName()) + ": Couldn't load " + key + ". A default value will be used (" +
                                 variable + ").");
@@ -121,15 +120,15 @@ protected:
         env.emplace_back('\0');
 
         if (!CreateProcess(NULL,
-                        (std::string("echo \"") + escape(req.body) + "\" | " + _bin_path).data(),  // command line
-                        NULL,              // process security attributes
-                        NULL,              // primary thread security attributes
-                        TRUE,              // handles are inherited
-                        0,                 // creation flags
-                        env.data(),        // use parent's environment
-                        NULL,              // use parent's current directory
-                        &start_info,       // STARTUPINFO pointer
-                        &proc_info)) {     // receives PROCESS_INFORMATION
+                           (std::string("echo \"") + escape(req.body) + "\" | " + _bin_path).data(),  // command line
+                           NULL,           // process security attributes
+                           NULL,           // primary thread security attributes
+                           TRUE,           // handles are inherited
+                           0,              // creation flags
+                           env.data(),     // use parent's environment
+                           NULL,           // use parent's current directory
+                           &start_info,    // STARTUPINFO pointer
+                           &proc_info)) {  // receives PROCESS_INFORMATION
             return {};
         } else {
             CloseHandle(proc_info.hProcess);
