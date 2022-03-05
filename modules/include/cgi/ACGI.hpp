@@ -59,22 +59,25 @@ public:
         std::tie(res.body, headers) = ExecuteCGICommand(req, ctx);
 
         if (res.body.empty() && headers.empty())
-            InternalError(res);
+            InternalError(res, "CGI Error.");
         else {
             ProcessHeaders(headers, res.headers);
             ProcessStatus(res);
+
+            ziapi::Logger::Info(res.body);
         }
     }
 
 protected:
     using unique_ptr_pipe_t = std::unique_ptr<FILE, decltype(&PCLOSE)>;
 
-    ACGI() = default;
+    ACGI(bool cmd_specify_file = false) : _cmd_specify_file(cmd_specify_file){};
 
-    void InternalError(http::Response &res)
+    void InternalError(http::Response &res, const std::string &body = "")
     {
         res.status_code = ziapi::http::Code::kInternalServerError;
-        res.body = "500 - Internal server error";
+        res.reason = ziapi::http::reason::kInternalServerError;
+        res.body = "<center><h1>500 - Internal server error</h1><p>" + body + "</p></center>";
     }
 
     // Execute the cgi command and returns the headers and body as a string pair
@@ -82,6 +85,7 @@ protected:
     {
         auto escape = [](const std::string &str) { return std::regex_replace(str, std::regex("\""), "\\\""); };
         auto envMap = GenerateEnv(req, ctx);
+        std::string command;
 #ifdef CGI_WIN
         std::vector<char> env;
         HANDLE child_output_w = NULL;
@@ -119,16 +123,21 @@ protected:
         }
         env.emplace_back('\0');
 
+        command += "echo \"" + escape(req.body) + "\" | " + _bin_path;
+        if (_cmd_specify_file) {
+            command += " " + envMap["SCRIPT_FILENAME"];
+        }
+
         if (!CreateProcess(NULL,
-                           (std::string("echo \"") + escape(req.body) + "\" | " + _bin_path).data(),  // command line
-                           NULL,           // process security attributes
-                           NULL,           // primary thread security attributes
-                           TRUE,           // handles are inherited
-                           0,              // creation flags
-                           env.data(),     // use parent's environment
-                           NULL,           // use parent's current directory
-                           &start_info,    // STARTUPINFO pointer
-                           &proc_info)) {  // receives PROCESS_INFORMATION
+                           command.data(),  // command line
+                           NULL,            // process security attributes
+                           NULL,            // primary thread security attributes
+                           TRUE,            // handles are inherited
+                           0,               // creation flags
+                           env.data(),      // use parent's environment
+                           NULL,            // use parent's current directory
+                           &start_info,     // STARTUPINFO pointer
+                           &proc_info)) {   // receives PROCESS_INFORMATION
             return {};
         } else {
             CloseHandle(proc_info.hProcess);
@@ -138,14 +147,15 @@ protected:
         return ProcessOutput(child_output_r);
     }
 #else
-        std::string command;
-
         command += "echo \"" + escape(req.body) + "\"" + " | env -i ";
 
         for (const auto &[key, value] : envMap) {
             command += key + "=\"" + escape(value) + "\" ";
         }
         command += _bin_path;
+
+        if (_cmd_specify_file)
+            command += " " + envMap["SCRIPT_FILENAME"];
 
         unique_ptr_pipe_t command_pipe(POPEN(command.c_str(), "r"), PCLOSE);
 
@@ -273,7 +283,9 @@ protected:
         std::size_t query_index = 0;
         std::unordered_map<std::string, std::string> env;
         const auto &headers = req.headers;
-        const auto filepath = std::filesystem::path(_root) / std::filesystem::path(req.target.substr(1));
+        const std::string tmp_target =
+            req.target.find('?') != std::string::npos ? req.target.substr(0, req.target.find('?')) : req.target;
+        const auto filepath = std::filesystem::path(_root) / std::filesystem::path(tmp_target.substr(1));
         std::string filepath_str = filepath.string();
         std::function<const std::string(const std::string &)> get_ctx_value = [&ctx](const std::string &key) {
             return ctx.find(key) != ctx.end() ? std::any_cast<std::string>(ctx.at(key)) : "";
@@ -312,4 +324,6 @@ protected:
     std::string _bin_path{};
     std::string _root = "/var/www/";
     std::string _version{};
+
+    bool _cmd_specify_file;
 };
