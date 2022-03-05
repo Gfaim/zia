@@ -1,6 +1,7 @@
 #pragma once
 
 #include <any>
+#include <array>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -21,7 +22,7 @@ using namespace ziapi;
 #include <windows.h>
 #define POPEN _popen
 #define PCLOSE _pclose
-#define FGETS _fgets
+#define FGETS fgets
 #else
 #define POPEN popen
 #define PCLOSE pclose
@@ -104,7 +105,6 @@ protected:
 
         PROCESS_INFORMATION proc_info;
         STARTUPINFO start_info;
-        BOOL success = FALSE;
 
         ZeroMemory(&proc_info, sizeof(PROCESS_INFORMATION));
         ZeroMemory(&start_info, sizeof(STARTUPINFO));
@@ -118,7 +118,7 @@ protected:
             std::string env_var_with_trailing_zero = key + "=" + value + '\0';
             env.insert(env.end(), env_var_with_trailing_zero.begin(), env_var_with_trailing_zero.end());
         }
-        env += '\0';
+        env.emplace_back('\0');
 
         if (!CreateProcess(NULL,
                         (std::string("echo \"") + escape(req.body) + "\" | " + _bin_path).data(),  // command line
@@ -129,7 +129,7 @@ protected:
                         env.data(),        // use parent's environment
                         NULL,              // use parent's current directory
                         &start_info,       // STARTUPINFO pointer
-                        &proc_info) {     // receives PROCESS_INFORMATION
+                        &proc_info)) {     // receives PROCESS_INFORMATION
             return {};
         } else {
             CloseHandle(proc_info.hProcess);
@@ -160,7 +160,7 @@ protected:
 #ifdef CGI_WIN
     std::pair<std::string, std::string> ProcessOutput(HANDLE pipe_read) const
     {
-        unsigned int bytes_read = 0;
+        DWORD bytes_read;
 #else
     std::pair<std::string, std::string> ProcessOutput(unique_ptr_pipe_t &pipe) const
     {
@@ -171,7 +171,7 @@ protected:
         std::string body;
 
 #ifdef CGI_WIN
-        while (ReadFile(pipe_read, buffer.data(), buffer.size(), &bytes_read, NULL) && bytes_read) {
+        while (ReadFile(pipe_read, buffer.data(), static_cast<DWORD>(buffer.size()), &bytes_read, NULL) && bytes_read) {
 #else
         while (FGETS(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
 #endif
@@ -231,7 +231,7 @@ protected:
 
         _version.clear();
         if (command_pipe) {
-            while (FGETS(buffer.data(), buffer.size(), command_pipe.get()) != nullptr) {
+            while (FGETS(buffer.data(), static_cast<int>(buffer.size()), command_pipe.get()) != nullptr) {
                 _version += buffer.data();
             }
         }
