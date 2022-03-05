@@ -101,8 +101,8 @@ public:
     {
         ssl_context_.set_options(asio::ssl::context::default_workarounds | asio::ssl::context::no_sslv2 |
                                  asio::ssl::context::single_dh_use);
-        // ssl_context_.use_certificate_chain_file("server.pem");
-        // ssl_context_.use_private_key_file("server.pem", asio::ssl::context::pem);
+        ssl_context_.use_certificate_chain_file("data/ssl/localhost.pem");
+        ssl_context_.use_private_key_file("data/ssl/localhost.key", asio::ssl::context::pem);
     }
 
     void Start(unsigned int num_threads_)
