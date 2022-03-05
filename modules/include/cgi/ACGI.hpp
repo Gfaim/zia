@@ -130,9 +130,9 @@ protected:
                         env.data(),        // use parent's environment
                         NULL,              // use parent's current directory
                         &start_info,       // STARTUPINFO pointer
-                        &proc_info) {      // receives PROCESS_INFORMATION
+                        &proc_info)      // receives PROCESS_INFORMATION
             return {};
-        } else {
+        else {
             CloseHandle(proc_info.hProcess);
             CloseHandle(proc_info.hThread);
             CloseHandle(child_output_w);
