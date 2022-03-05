@@ -3,6 +3,10 @@
 
 class Socket : public asio::ip::tcp::socket {
 public:
+    static constexpr std::uint16_t kProtocolPort{80};
+
+    static constexpr const char *kProtocolName{"http"};
+
     using Base = asio::ip::tcp::socket;
 
     using Base::Base;
@@ -18,6 +22,10 @@ public:
 
 class TlsSocket : public asio::ssl::stream<asio::ip::tcp::socket> {
 public:
+    static constexpr std::uint16_t kProtocolPort{443};
+
+    static constexpr const char *kProtocolName{"https"};
+
     using Base = asio::ssl::stream<asio::ip::tcp::socket>;
 
     using Base::Base;

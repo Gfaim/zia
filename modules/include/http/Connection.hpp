@@ -122,6 +122,9 @@ private:
 
     void PopulateRequestContext(ziapi::http::Request &req, ziapi::http::Context &ctx)
     {
+        ctx.emplace("http.server.name", std::make_any<std::string>("Awougah"));
+        ctx.emplace("http.server.port", std::make_any<std::uint16_t>(TSocket::kProtocolPort));
+        ctx.emplace("http.server.protocol", std::make_any<std::string>(TSocket::kProtocolName));
         ctx.emplace("client.socket.address", std::make_any<std::string>(remote_endpoint_.address().to_string()));
         ctx.emplace("client.socket.port", std::make_any<std::uint16_t>(remote_endpoint_.port()));
         if (req.headers.find(ziapi::http::header::kConnection) == req.headers.end()) {
