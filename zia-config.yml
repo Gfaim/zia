@@ -2,7 +2,7 @@ modules:
   locations:
     - ./modules
   http:
-    enableTls: false
+    enableTls: true
   config:
     directoryListing:
       root: "./"

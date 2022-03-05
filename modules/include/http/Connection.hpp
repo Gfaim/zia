@@ -12,7 +12,7 @@
 #include "RequestStreamParser.hpp"
 #include "ResponseToString.hpp"
 #include "SafeRequestQueue.hpp"
-#include "TlsSocket.hpp"
+#include "Socket.hpp"
 
 template <typename TSocket>
 class BaseConnection : public std::enable_shared_from_this<BaseConnection<TSocket>> {
@@ -36,7 +36,11 @@ public:
         }
     }
 
-    void Start() { DoRead(); }
+    void Start()
+    {
+        socket_.Start(
+            [this, me = this->shared_from_this()](auto ec) { CallbackWrapper(ec, [this]() { this->DoRead(); }); });
+    }
 
     void Close()
     {
@@ -148,6 +152,6 @@ private:
     RequestStreamParser parser_stream_;
 };
 
-using Connection = BaseConnection<asio::ip::tcp::socket>;
+using Connection = BaseConnection<Socket>;
 
 using TlsConnection = BaseConnection<TlsSocket>;

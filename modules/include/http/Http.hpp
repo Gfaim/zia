@@ -40,5 +40,5 @@ private:
 
     std::optional<Server> server_;
 
-    std::optional<Server> tls_server_;
+    std::optional<TlsServer> tls_server_;
 };

@@ -24,8 +24,9 @@ void HttpModule::Init(const ziapi::config::Node &cfg)
 void HttpModule::Run(ziapi::http::IRequestOutputQueue &requests, ziapi::http::IResponseInputQueue &responses)
 {
     if (enable_tls_) {
+        ziapi::Logger::Info("tls enabled");
         tls_server_.emplace(requests, responses);
-        server_->Start(num_threads_);
+        tls_server_->Start(num_threads_);
     } else {
         server_.emplace(requests, responses);
         server_->Start(num_threads_);

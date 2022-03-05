@@ -94,11 +94,15 @@ public:
         : ctx_(),
           strand_(ctx_),
           acceptor_(ctx_),
-          ssl_context_(asio::ssl::context_base::tls),
+          ssl_context_(asio::ssl::context_base::sslv23),
           conn_manager_(),
           requests_(requests),
           responses_(responses)
     {
+        ssl_context_.set_options(asio::ssl::context::default_workarounds | asio::ssl::context::no_sslv2 |
+                                 asio::ssl::context::single_dh_use);
+        // ssl_context_.use_certificate_chain_file("server.pem");
+        // ssl_context_.use_private_key_file("server.pem", asio::ssl::context::pem);
     }
 
     void Start(unsigned int num_threads_)
