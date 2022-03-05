@@ -1,6 +1,10 @@
 locations:
   - ./modules
 modules:
+  reverseProxy:
+    address: google.com
+    port: 443
+    tls: true
   http:
     ssl: 
       enable: true
