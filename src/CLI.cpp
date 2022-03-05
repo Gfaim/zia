@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <thread>
+#include <ziapi/Logger.hpp>
 
 namespace zia {
 
@@ -14,7 +15,8 @@ CLI::CLI(const zia::Params &args, const ziapi::config::Node &cfg)
       cfg_(cfg)
 {
     for (auto &mod : modules_) {
-        std::cout << "Module: " << mod->GetName() << std::endl;
+        ziapi::Logger::Info("using module: ", mod->GetName(), " v", mod->GetVersion().major, ".",
+                            mod->GetVersion().minor, ".", mod->GetVersion().patch);
     }
     StartModulePipeline();
     Run();

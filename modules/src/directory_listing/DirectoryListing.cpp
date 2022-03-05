@@ -1,10 +1,12 @@
 #include "DirectoryListing.hpp"
 
+#include <ziapi/Logger.hpp>
+
 #include "dylib/dylib.hpp"
 
 void DirectoryListingModule::Init(const ziapi::config::Node &cfg)
 {
-    root_ = cfg["modules"]["config"]["directoryListing"]["root"].AsString();
+    root_ = cfg["modules"]["directoryListing"]["root"].AsString();
 
     if (root_.length() > 1 && root_[root_.length() - 1] == '/')
         root_.pop_back();
