@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.4.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.4.0/highlight.min.js"></script>
+</head>
+
+<style>
+    * {
+        font-family: 'Roboto Mono' !important;
+    }
+
+    .file-name {
+        font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, Roboto, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol' !important;
+    }
+</style>
+
+<body class="flex items-center justify-center w-screen h-screen">
+    <div class="w-[720px] h-[480px] bg-gray-100 rounded-xl shadow-xl border border-gray-200 relative overflow-hidden">
+        <div class="flex p-2 h-8 items-center absolute">
+            <div class="h-[14px] w-[14px] rounded-full bg-[#fe6055] border-[1px] border-gray-200 mr-1"></div>
+            <div class="h-[14px] w-[14px] rounded-full bg-[#ffbc2d] border-[1px] border-gray-200 mr-1"></div>
+            <div class="h-[14px] w-[14px] rounded-full bg-[#25c73e] border-[1px] border-gray-200"></div>
+        </div>
+        <div class="file-name flex justify-center p-1 h-8 font-semibold border-b border-gray-200 items-center">
+            main.js
+        </div>
+        <div class="bg-white h-full overflow-scroll p-2 text-sm">
+            <pre>
+<code lang="javascript" class="!bg-white">const lowerNumber = parseInt(prompt('Enter lower number: '));
+const higherNumber = parseInt(prompt('Enter higher number: '));
+
+console.log(`The prime numbers between ${lowerNumber} and ${higherNumber} are:`);
+
+// looping from lowerNumber to higherNumber
+for (let i = lowerNumber; i <= higherNumber; i++) {
+    let flag=0;
+    // looping through 2 to user input number
+    for (let j=2; j < i; j++) {
+        if (i % j==0) {
+            flag=1; break;
+        }
+    }
+    // if number greater than 1 and not divisible by other numbers
+    if (i> 1 && flag == 0) {
+        console.log(i);
+    }
+}</code>
+            </pre>
+        </div>
+    </div>
+    <script>
+        window.onload = function () {
+            hljs.highlightAll();
+        }
+    </script>
+</body>
+
+</html>
