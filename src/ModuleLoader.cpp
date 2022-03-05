@@ -57,7 +57,7 @@ std::vector<std::unique_ptr<ziapi::IModule>> GetModulesFromLibs(const std::vecto
 std::vector<std::filesystem::path> GetLibraryPathFromCfg(const ziapi::config::Node &cfg)
 {
     std::vector<std::filesystem::path> folders_path;
-    auto mod_sources = cfg["modules"]["locations"].AsArray();
+    auto mod_sources = cfg["locations"].AsArray();
 
     for (const auto &el : mod_sources) {
         folders_path.push_back(std::filesystem::path(el->AsString()));

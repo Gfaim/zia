@@ -1,6 +1,7 @@
 #include "Zia.hpp"
 
 #include <iostream>
+#include <ziapi/Logger.hpp>
 
 #include "CLI.hpp"
 #include "ConfigLoader.hpp"
@@ -31,7 +32,7 @@ Params Zia::ParseCommandLineArguments(int ac, char const **av)
     cxxopts::Options options("Zia", "Epitech's best HTTP server.");
 
     options.add_options()("C,config", "Configuration path",
-                          cxxopts::value<std::string>()->default_value("./config.yml"))(
+                          cxxopts::value<std::string>()->default_value("./zia-config.yml"))(
         "T,num-threads", "Number of threads", cxxopts::value<int>()->default_value("4"))("h,help", "This help message");
 
     options.allow_unrecognised_options();
