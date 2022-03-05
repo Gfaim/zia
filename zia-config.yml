@@ -9,4 +9,9 @@ modules:
   directoryListing:
     root: "./"
   php-cgi:
-    foo: bar
+    root: "./php"
+    bin_path: "/usr/bin/php-cgi"
+  ruby-cgi:
+    root: "./"
+  perl-cgi:
+    root: "./"
