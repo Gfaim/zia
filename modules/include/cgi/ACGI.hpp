@@ -15,7 +15,7 @@
 
 using namespace ziapi;
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#if defined(WIN32) || defined(_WIN64) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #define CGI_WIN
 #include <strsafe.h>
 #include <windows.h>
@@ -58,7 +58,6 @@ public:
         std::string headers;
         std::tie(res.body, headers) = ExecuteCGICommand(req, ctx);
 
-        // keep
         if (res.body.empty() && headers.empty())
             InternalError(res);
         else {
@@ -130,16 +129,15 @@ protected:
                         env.data(),        // use parent's environment
                         NULL,              // use parent's current directory
                         &start_info,       // STARTUPINFO pointer
-                        &proc_info)      // receives PROCESS_INFORMATION
+                        &proc_info) {     // receives PROCESS_INFORMATION
             return {};
-        else {
+        } else {
             CloseHandle(proc_info.hProcess);
             CloseHandle(proc_info.hThread);
             CloseHandle(child_output_w);
         }
         return ProcessOutput(child_output_r);
     }
-
 #else
         std::string command;
 
@@ -309,9 +307,9 @@ protected:
         return env;
     }
 
-    std::vector<std::string> headers_env{"Content-Length", "Content-Type",    "Accept",        "Accept-Encoding",
-                                         "Accept-Charset", "Accept-Language", "Host",          "From",
-                                         "Referer",        "User-Agent",      "Cache-Control", "Referer"};
+    std::vector<std::string> headers_env{"Content-Length", "Content-Type",    "Accept",       "Accept-Encoding",
+                                         "Accept-Charset", "Accept-Language", "Host",         "From",
+                                         "Referer",        "User-Agent",      "Cache-Control"};
     std::string _bin_path{};
     std::string _root = "/var/www/";
     std::string _version{};
