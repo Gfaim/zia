@@ -5,7 +5,7 @@
 
 class FileHtmlFactory {
 private:
-    std::ostringstream ss;
+    std::ostringstream ss{};
     const std::filesystem::path &m_path;
 
     void CreateHeader();
