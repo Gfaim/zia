@@ -12,9 +12,8 @@ CLI::CLI(const zia::Params &args, const ziapi::config::Node &cfg)
       pipeline_(std::make_unique<ModulePipeline>(cfg, modules_, args.num_threads)),
       pipeline_thread_(),
       input_thread_(),
-      hot_reload_thread_(),
-      pipeline_mutex_(),
-      watcher_(zia::GetLibraryPathFromCfg(cfg)),
+      //   hot_reload_thread_(),
+      //   watcher_(zia::GetLibraryPathFromCfg(cfg)),
       args_(args),
       cfg_(cfg),
       should_restart_()
@@ -30,20 +29,20 @@ CLI::CLI(const zia::Params &args, const ziapi::config::Node &cfg)
 void CLI::StartModulePipeline()
 {
     pipeline_thread_ = std::thread([&]() { pipeline_->Run(); });
-    hot_reload_thread_ = std::thread([&]() { this->HotReload(); });
+    // hot_reload_thread_ = std::thread([&]() { this->HotReload(); });
     input_thread_ = std::thread([&]() { this->HandleInput(); });
 }
 
-void CLI::HotReload()
-{
-    while (!should_restart_) {
-        if (watcher_.HasChanged()) {
-            should_restart_ = true;
-            watcher_.Update();
-        }
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-}
+// void CLI::HotReload()
+// {
+//     while (!should_restart_) {
+//         if (watcher_.HasChanged()) {
+//             should_restart_ = true;
+//             watcher_.Update();
+//         }
+//         std::this_thread::sleep_for(std::chrono::seconds(1));
+//     }
+// }
 
 void CLI::HandleInput()
 {
@@ -53,7 +52,7 @@ void CLI::HandleInput()
         if (input == "q") {
             break;
         }
-        if (input == "r" or input == "restart") {
+        if (input == "r" or input == "reload") {
             should_restart_ = true;
         }
     }
@@ -73,7 +72,7 @@ void CLI::CleanUp()
     // Clear all threads
     pipeline_->Terminate();
     pipeline_thread_.join();
-    hot_reload_thread_.join();
+    // hot_reload_thread_.join();
 }
 
 void CLI::Restart()
@@ -93,7 +92,7 @@ void CLI::Restart()
     ziapi::Logger::Debug("Instantiating Module pipeline...");
     pipeline_ = std::make_unique<ModulePipeline>(cfg_, modules_, args_.num_threads);
     pipeline_thread_ = std::thread([&]() { pipeline_->Run(); });
-    hot_reload_thread_ = std::thread([&]() { this->HotReload(); });
+    // hot_reload_thread_ = std::thread([&]() { this->HotReload(); });
     should_restart_ = false;
     ziapi::Logger::Debug("Successfully restarted!");
 }

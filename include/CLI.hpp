@@ -25,7 +25,7 @@ private:
 
     void HandleInput();
 
-    void HotReload();
+    // void HotReload();
 
     void Restart();
 
@@ -42,11 +42,9 @@ private:
 
     std::thread input_thread_;
 
-    std::thread hot_reload_thread_;
+    // std::thread hot_reload_thread_;
 
-    std::mutex pipeline_mutex_;
-
-    FileWatcher watcher_;
+    // FileWatcher watcher_;
 
     Params args_;
 
