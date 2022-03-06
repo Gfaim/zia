@@ -59,7 +59,8 @@ void DirectoryHtmlFactory::CreateBodyOpening()
           "af21153d07a2e92bde7b2ad155055489_low_res_1619092574091.png\">\n";
     ss << "            " << m_path.filename().string() << '\n';
     ss << "        </div>\n";
-    ss << "        <div class=\"w-[720px] max-h-[480px] bg-white h-full overflow-y-scroll rounded-b-xl rounde\">\n";
+    ss << "        <div class=\"w-[720px] min-h-[480px] max-h-[480px] bg-white h-full overflow-y-scroll rounded-b-xl "
+          "rounde\">\n";
     if (m_path != "" and m_path != "/" and m_path != "./") {
         auto parent_path = m_path.parent_path().string();
         if (!parent_path.empty() and parent_path.front() == '.')
