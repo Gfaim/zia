@@ -30,6 +30,8 @@ public:
 
     void Handle(ziapi::http::Context &ctx, const ziapi::http::Request &req, ziapi::http::Response &res) override;
 
+    static bool IsImage(const std::string &ext);
+
 private:
     std::string root_;
 };
