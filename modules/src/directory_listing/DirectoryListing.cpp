@@ -26,8 +26,12 @@ void DirectoryListingModule::Init(const ziapi::config::Node &cfg)
     return req.method == ziapi::http::method::kGet;
 }
 
-void DirectoryListingModule::Handle(ziapi::http::Context &, const ziapi::http::Request &req, ziapi::http::Response &res)
+bool DirectoryListingModule::IsImage(const std::string &ext)
+{
+    return ext == ".png" or ext == ".jpg" or ext == ".jpeg";
+}
 
+void DirectoryListingModule::Handle(ziapi::http::Context &, const ziapi::http::Request &req, ziapi::http::Response &res)
 {
     auto target = req.target;
 
@@ -41,8 +45,13 @@ void DirectoryListingModule::Handle(ziapi::http::Context &, const ziapi::http::R
         DirectoryHtmlFactory fac(filepath);
         res.body = fac.GetHtml();
     } else if (std::filesystem::is_regular_file(filepath)) {
-        FileHtmlFactory fac(filepath);
-        res.body = fac.GetHtml();
+        if (IsImage(filepath.extension().string())) {
+            res.headers[ziapi::http::header::kContentType] = "image/jpeg";
+            res.body = FileHtmlFactory::GetFileContent(filepath.filename().string());
+        } else {
+            FileHtmlFactory fac(filepath);
+            res.body = fac.GetHtml();
+        }
     } else {
         res.status_code = ziapi::http::Code::kNotFound;
         res.reason = ziapi::http::reason::kNotFound;

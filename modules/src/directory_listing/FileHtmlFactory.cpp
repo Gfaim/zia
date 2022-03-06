@@ -37,6 +37,10 @@ void FileHtmlFactory::CreateHeader()
 
 void FileHtmlFactory::CreateBody()
 {
+    auto file_content = GetFileContent(m_path.string());
+    ReplaceAllOccurences(file_content, "<", "&lt;");
+    ReplaceAllOccurences(file_content, ">", "&gt;");
+
     ss << "<body class=\"flex items-center justify-center w-screen h-screen\">\n";
     ss << "    <div class=\"w-[720px] h-[480px] bg-gray-100 rounded-xl shadow-xl border border-gray-200 relative "
           "overflow-hidden\">\n";
@@ -55,7 +59,7 @@ void FileHtmlFactory::CreateBody()
     ss << "        <div class=\"bg-white h-full overflow-scroll p-2 text-sm\">\n";
     ss << "            <pre>\n";
     ss << "<code lang=\"\" class=\"!bg-white\">";
-    ss << GetFileContent(m_path.string()) << "</code>\n";
+    ss << file_content << "</code>\n";
     ss << "            </pre>\n";
     ss << "        </div>\n";
     ss << "    </div>\n";
@@ -79,14 +83,12 @@ void FileHtmlFactory::ReplaceAllOccurences(std::string& str, const std::string& 
 
 std::string FileHtmlFactory::GetFileContent(const std::string& path)
 {
-    std::string file_content{};
     std::ifstream file_stream(path);
+    std::ostringstream out_stream;
     if (!file_stream.is_open())
         return "";
-    std::getline(file_stream, file_content, '\0');
-    ReplaceAllOccurences(file_content, "<", "&lt;");
-    ReplaceAllOccurences(file_content, ">", "&gt;");
-    return file_content;
+    out_stream << file_stream.rdbuf();
+    return out_stream.str();
 }
 
 std::string FileHtmlFactory::GetHtml() { return ss.str(); }
