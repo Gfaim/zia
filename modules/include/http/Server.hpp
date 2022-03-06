@@ -11,7 +11,13 @@
 class Server {
 public:
     Server(ziapi::http::IRequestOutputQueue &requests, ziapi::http::IResponseInputQueue &responses)
-        : ctx_(), strand_(ctx_), acceptor_(ctx_), conn_manager_(), requests_(requests), responses_(responses)
+        : ctx_(),
+          strand_(ctx_),
+          acceptor_(ctx_),
+          conn_manager_(),
+          requests_(requests),
+          responses_(responses),
+          is_running_(true)
     {
     }
 
@@ -19,7 +25,7 @@ public:
     {
         AcceptConnections();
         StartThreadPool(num_threads_);
-        while (true) {
+        while (is_running_) {
             if (responses_.Size()) {
                 auto res = responses_.Pop();
                 if (res) {
@@ -32,6 +38,7 @@ public:
 
     void Stop()
     {
+        is_running_ = false;
         ctx_.stop();
         for (auto &t : thread_pool_) {
             if (t.joinable()) {
@@ -86,6 +93,8 @@ private:
     SafeRequestQueue requests_;
 
     ziapi::http::IResponseInputQueue &responses_;
+
+    std::atomic_bool is_running_;
 };
 
 class TlsServer {
@@ -98,7 +107,8 @@ public:
           ssl_context_(asio::ssl::context_base::sslv23),
           conn_manager_(),
           requests_(requests),
-          responses_(responses)
+          responses_(responses),
+          is_running_(true)
     {
         ssl_context_.set_options(asio::ssl::context::default_workarounds | asio::ssl::context::no_sslv2 |
                                  asio::ssl::context::single_dh_use);
@@ -110,7 +120,7 @@ public:
     {
         AcceptConnections();
         StartThreadPool(num_threads_);
-        while (true) {
+        while (is_running_) {
             if (responses_.Size()) {
                 auto res = responses_.Pop();
                 if (res) {
@@ -123,6 +133,7 @@ public:
 
     void Stop()
     {
+        is_running_ = false;
         ctx_.stop();
         for (auto &t : thread_pool_) {
             if (t.joinable()) {
@@ -181,4 +192,6 @@ private:
     SafeRequestQueue requests_;
 
     ziapi::http::IResponseInputQueue &responses_;
+
+    std::atomic_bool is_running_;
 };
