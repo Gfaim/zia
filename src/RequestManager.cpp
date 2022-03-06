@@ -41,6 +41,7 @@ void RequestManager::Clear()
 void RequestManager::Worker(RequestManager *self)
 {
     while (true) {
+        std::this_thread::yield();
         std::optional<std::pair<ziapi::http::Request, ziapi::http::Context>> m_current_req = std::nullopt;
         ziapi::http::Response res{};
         ziapi::http::Request req{};
