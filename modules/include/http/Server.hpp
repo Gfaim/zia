@@ -17,7 +17,7 @@ public:
           conn_manager_(),
           requests_(requests),
           responses_(responses),
-          is_running(true)
+          is_running_(true)
     {
     }
 
