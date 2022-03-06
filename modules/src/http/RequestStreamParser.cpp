@@ -75,6 +75,17 @@ std::size_t RequestStreamParser::ParseHeaderKey(void)
     if (bytes_parsed) {
         if (bytes_parsed == 1)
             throw std::invalid_argument("Specify a valid header value");
+
+        // Format header with lowercase and Capital first letters
+        std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+        std::size_t find_pos = 0;
+        while (find_pos != std::string::npos) {
+            if (find_pos && find_pos != key.size())
+                find_pos++;
+            if (std::isalpha(key[find_pos]) && std::islower(key[find_pos]))
+                key[find_pos] = std::toupper(key[find_pos]);
+            find_pos = key.find('-', find_pos);
+        }
         last_header_key_ = key;
         state_ = kHeaderValue;
     } else if (crlf_tmp == 0) {
