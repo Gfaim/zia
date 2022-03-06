@@ -39,11 +39,11 @@ private:
 
     bool enable_tls_;
 
-    std::filesystem::path cert_;
+    std::filesystem::path cert_{};
 
-    std::filesystem::path key_;
+    std::filesystem::path key_{};
 
-    std::optional<Server> server_;
+    std::optional<Server> server_{};
 
-    std::optional<TlsServer> tls_server_;
+    std::optional<TlsServer> tls_server_{};
 };

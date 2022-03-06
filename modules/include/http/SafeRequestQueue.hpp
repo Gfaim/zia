@@ -13,7 +13,7 @@ public:
     [[nodiscard]] std::size_t Size() noexcept;
 
 private:
-    std::mutex mu_;
+    std::mutex mu_{};
 
     ziapi::http::IRequestOutputQueue &queue_;
 };

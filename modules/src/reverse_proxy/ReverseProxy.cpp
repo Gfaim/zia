@@ -35,7 +35,7 @@ std::string to_string(const ziapi::http::Request &r)
 template <typename TSyncStream>
 ziapi::http::Response DoRequest(TSyncStream &s, const ziapi::http::Request &req)
 {
-    ziapi::http::Response res;
+    ziapi::http::Response res{};
     auto req_string = to_string(req);
     ResponseStreamParser res_parser;
 
