@@ -307,11 +307,11 @@ protected:
         env["REQUEST_METHOD"] = req.method;
 
         // Client/Server Context
-        env["REMOTE_ADDR"] = get_ctx_value("client.addr");
-        env["REMOTE_PORT"] = get_ctx_value("client.port");
-        env["SERVER_NAME"] = get_ctx_value("server.name");
-        env["SERVER_PORT"] = get_ctx_value("server.port");
-        env["SERVER_PROTOCOL"] = get_ctx_value("server.protocol");
+        env["REMOTE_ADDR"] = get_ctx_value("client.socket.address");
+        env["REMOTE_PORT"] = get_ctx_value("client.socket.port");
+        env["SERVER_NAME"] = get_ctx_value("http.server.name");
+        env["SERVER_PORT"] = get_ctx_value("http.server.port");
+        env["SERVER_PROTOCOL"] = get_ctx_value("http.server.protocol");
         env["SERVER_SOFTWARE"] = _version;
         env["DOCUMENT_ROOT"] = _root;
 
