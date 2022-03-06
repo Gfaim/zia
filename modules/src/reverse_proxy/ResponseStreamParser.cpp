@@ -82,7 +82,7 @@ std::size_t ResponseStreamParser::ParseHeaderKey(void)
         std::transform(key.begin(), key.end(), key.begin(), ::tolower);
         std::size_t find_pos = 0;
         while (find_pos != std::string::npos) {
-            if (find_pos && find_pos != key.size())
+            if (find_pos && find_pos != (key.size() - 1))
                 find_pos++;
             if (std::isalpha(key[find_pos]) && std::islower(key[find_pos]))
                 key[find_pos] = std::toupper(key[find_pos]);
