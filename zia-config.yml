@@ -1,6 +1,8 @@
 locations:
   - ./modules
 modules:
+  notes:
+    folder: ./
   logger:
     route: /logs
     buffer_size: 200
