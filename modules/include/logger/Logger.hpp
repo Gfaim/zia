@@ -5,8 +5,8 @@
 #include "ziapi/Module.hpp"
 
 class LoggerModule : virtual public ziapi::IPreProcessorModule,
-                     public ziapi::IPostProcessorModule,
-                     public ziapi::IHandlerModule {
+                     virtual public ziapi::IPostProcessorModule,
+                     virtual public ziapi::IHandlerModule {
 private:
     struct RequestInfos {
         double timestamp;

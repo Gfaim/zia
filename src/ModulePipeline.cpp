@@ -73,7 +73,6 @@ void ModulePipeline::Run()
         if (should_stop_)
             break;
         if (try_req) {
-            ziapi::Logger::Error("OYESG AZE FZRI ", try_req.has_value());
             req_manager_.AddRequest(try_req.value());
         }
         for (auto &res : req_manager_.PopResponses()) responses_.Push(std::move(res));
