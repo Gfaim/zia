@@ -4,6 +4,8 @@
 #include <thread>
 #include <ziapi/Logger.hpp>
 
+#include "ConfigLoader.hpp"
+
 namespace zia {
 
 CLI::CLI(const zia::Params &args, const ziapi::config::Node &cfg)
@@ -82,6 +84,7 @@ void CLI::Restart()
     // recreate pipeline obj;
     CleanUp();
     modules_.clear();
+    cfg_ = LoadConfig(args_.config_file_path);
     libs_ = zia::LoadDynamicLibsFromLocations(zia::GetLibraryLocationsFromConfig(cfg_));
     ziapi::Logger::Debug("Getting modules from libraries");
     modules_ = zia::GetModulesFromLibs(libs_);
