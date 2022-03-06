@@ -9,6 +9,8 @@ class ConnectionManager {
 public:
     using SharedConnection = std::shared_ptr<TConnection>;
 
+    ConnectionManager() = default;
+
     void Add(SharedConnection conn)
     {
         std::scoped_lock sl(mu_);
@@ -62,7 +64,7 @@ public:
     }
 
 private:
-    std::mutex mu_;
+    std::mutex mu_{};
 
-    std::vector<SharedConnection> connections_;
+    std::vector<SharedConnection> connections_{};
 };

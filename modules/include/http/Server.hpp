@@ -79,9 +79,9 @@ private:
 
     ConnectionManager<Connection> conn_manager_;
 
-    std::vector<std::thread> thread_pool_;
+    std::vector<std::thread> thread_pool_{};
 
-    std::condition_variable must_stop_cv_;
+    std::condition_variable must_stop_cv_{};
 
     SafeRequestQueue requests_;
 
@@ -174,9 +174,9 @@ private:
 
     ConnectionManager<TlsConnection> conn_manager_;
 
-    std::vector<std::thread> thread_pool_;
+    std::vector<std::thread> thread_pool_{};
 
-    std::condition_variable must_stop_cv_;
+    std::condition_variable must_stop_cv_{};
 
     SafeRequestQueue requests_;
 
