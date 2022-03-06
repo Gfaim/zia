@@ -72,8 +72,9 @@ void ModulePipeline::Run()
         auto try_req = requests_.Pop();
         if (should_stop_)
             break;
-        if (try_req)
+        if (try_req) {
             req_manager_.AddRequest(try_req.value());
+        }
         for (auto &res : req_manager_.PopResponses()) responses_.Push(std::move(res));
     }
 }
