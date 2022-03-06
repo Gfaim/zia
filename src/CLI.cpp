@@ -7,7 +7,7 @@
 namespace zia {
 
 CLI::CLI(const zia::Params &args, const ziapi::config::Node &cfg)
-    : libs_(zia::LoadDynamicLibsFromDirs(zia::GetLibraryPathFromCfg(cfg))),
+    : libs_(zia::LoadDynamicLibsFromLocations(zia::GetLibraryLocationsFromConfig(cfg))),
       modules_(zia::GetModulesFromLibs(libs_)),
       pipeline_(std::make_unique<ModulePipeline>(cfg, modules_, args.num_threads)),
       pipeline_thread_(),
@@ -82,7 +82,7 @@ void CLI::Restart()
     // recreate pipeline obj;
     CleanUp();
     modules_.clear();
-    libs_ = zia::LoadDynamicLibsFromDirs(zia::GetLibraryPathFromCfg(cfg_));
+    libs_ = zia::LoadDynamicLibsFromLocations(zia::GetLibraryLocationsFromConfig(cfg_));
     ziapi::Logger::Debug("Getting modules from libraries");
     modules_ = zia::GetModulesFromLibs(libs_);
     for (auto &mod : modules_) {

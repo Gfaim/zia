@@ -1,5 +1,7 @@
 locations:
-  - ./modules
+  - ./modules/lib/directory_listing
+  - ./modules/lib/http
+  - ./modules/lib/logger
 modules:
   notes:
     folder: ./

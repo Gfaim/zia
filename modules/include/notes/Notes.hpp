@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ziapi/Module.hpp>
 #include <mutex>
+#include <ziapi/Module.hpp>
 
 class NotesModule : public ziapi::IHandlerModule {
 private:
@@ -37,7 +37,7 @@ public:
 
     [[nodiscard]] double GetHandlerPriority() const noexcept override { return 0; }
 
-    [[nodiscard]] bool ShouldHandle(const ziapi::http::Context &ctx, const ziapi::http::Request &req) const override
+    [[nodiscard]] bool ShouldHandle(const ziapi::http::Context &, const ziapi::http::Request &req) const override
     {
         return req.target.rfind("/notes", 0) == 0;
     }

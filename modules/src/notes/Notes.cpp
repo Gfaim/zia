@@ -13,7 +13,6 @@ std::string NotesModule::NoteToJson(int id, const Note &note)
 int NotesModule::GetIdFromTarget(const std::string &target)
 {
     auto tmp = target.find("id=");
-    auto id = 0;
     if (tmp != std::string::npos) {
         return std::atoi(&target[tmp + 3]);
     }
@@ -75,7 +74,7 @@ void NotesModule::Delete(int id, ziapi::http::Response &res)
 }
 
 #include <iostream>
-void NotesModule::Handle(ziapi::http::Context &ctx, const ziapi::http::Request &req, ziapi::http::Response &res)
+void NotesModule::Handle(ziapi::http::Context &, const ziapi::http::Request &req, ziapi::http::Response &res)
 {
     std::cout << "Notes handler" << std::endl;
     auto id = GetIdFromTarget(req.target);
@@ -87,7 +86,7 @@ void NotesModule::Handle(ziapi::http::Context &ctx, const ziapi::http::Request &
     }
     {
         std::scoped_lock lock(mu_);
-        
+
         if (req.method == "GET") {
             return Get(id, res);
         } else if (req.method == "DELETE") {

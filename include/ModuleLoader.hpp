@@ -11,10 +11,10 @@ namespace zia {
 
 std::vector<dylib> LoadDynamicLibsFromDir(const std::filesystem::path &lib_path);
 
-std::vector<dylib> LoadDynamicLibsFromDirs(const std::vector<std::filesystem::path> &lib_path_list);
+std::vector<dylib> LoadDynamicLibsFromLocations(const std::vector<std::string> &lib_path_list);
 
 std::vector<std::unique_ptr<ziapi::IModule>> GetModulesFromLibs(const std::vector<dylib> &libs);
 
-std::vector<std::filesystem::path> GetLibraryPathFromCfg(const ziapi::config::Node &cfg);
+std::vector<std::string> GetLibraryLocationsFromConfig(const ziapi::config::Node &cfg);
 
 }  // namespace zia

@@ -18,6 +18,7 @@ void DirectoryHtmlFactory::CreateHeader()
     ss << "    <meta charset=\"UTF-8\">\n";
     ss << "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
     ss << "    <script src=\"https://cdn.tailwindcss.com\"></script>\n";
+    ss << "    <link rel=\"shortcut icon\" href=\"/favicon.ico\">";
     ss << "</head>\n\n";
     ss << "<style>\n";
     ss << "    * {\n";

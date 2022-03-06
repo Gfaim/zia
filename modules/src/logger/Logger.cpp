@@ -30,7 +30,7 @@ void LoggerModule::PostProcess(ziapi::http::Context &ctx, const ziapi::http::Req
     {
         std::scoped_lock lock(mu_);
         requests_.push_back(RequestInfos{timestamptz, req, res});
-    
+
         while (requests_.size() >= requests_buffer_size_) {
             requests_.erase(requests_.begin());
         }
@@ -57,7 +57,7 @@ void LoggerModule::PreProcess(ziapi::http::Context &ctx, ziapi::http::Request &r
     ctx["method"] = req.method;
 }
 
-void LoggerModule::Handle(ziapi::http::Context &ctx, const ziapi::http::Request &req, ziapi::http::Response &res)
+void LoggerModule::Handle(ziapi::http::Context &, const ziapi::http::Request &, ziapi::http::Response &res)
 {
     res.status_code = ziapi::http::Code::kOK;
     res.body =
@@ -119,7 +119,7 @@ void LoggerModule::Handle(ziapi::http::Context &ctx, const ziapi::http::Request 
 
 [[nodiscard]] double LoggerModule::GetHandlerPriority() const noexcept { return 0; }
 
-[[nodiscard]] bool LoggerModule::ShouldHandle(const ziapi::http::Context &ctx, const ziapi::http::Request &req) const
+[[nodiscard]] bool LoggerModule::ShouldHandle(const ziapi::http::Context &, const ziapi::http::Request &req) const
 {
     return req.method == "GET" && req.target == logs_route_;
 }
