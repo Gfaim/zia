@@ -1,6 +1,9 @@
 locations:
   - ./modules
 modules:
+  logger:
+    route: /logs
+    buffer_size: 200
   reverseProxy:
     address: google.com
     port: 443

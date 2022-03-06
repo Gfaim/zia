@@ -4,9 +4,22 @@
 #include "ziapi/Logger.hpp"
 #include "ziapi/Module.hpp"
 
-class LoggerModule : virtual public ziapi::IPreProcessorModule, public ziapi::IPostProcessorModule {
+class LoggerModule : virtual public ziapi::IPreProcessorModule,
+                     public ziapi::IPostProcessorModule,
+                     public ziapi::IHandlerModule {
+private:
+    struct RequestInfos {
+        double timestamp;
+        ziapi::http::Request req;
+        ziapi::http::Response res;
+    };
+
+    std::string logs_route_{};
+    std::vector<RequestInfos> requests_{};
+    std::uint32_t requests_buffer_size_{100};
+
 public:
-    void Init(const ziapi::config::Node &) override {}
+    void Init(const ziapi::config::Node &) override;
 
     [[nodiscard]] ziapi::Version GetVersion() const noexcept override { return {3, 1, 0}; }
 
@@ -19,6 +32,10 @@ public:
         return "Log all responses from HTTP requests";
     }
 
+    [[nodiscard]] double GetHandlerPriority() const noexcept override;
+
+    [[nodiscard]] bool ShouldHandle(const ziapi::http::Context &ctx, const ziapi::http::Request &req) const override;
+
     [[nodiscard]] double GetPostProcessorPriority() const noexcept override;
 
     [[nodiscard]] bool ShouldPostProcess(const ziapi::http::Context &ctx, const ziapi::http::Request &req,
@@ -28,6 +45,8 @@ public:
 
     [[nodiscard]] bool ShouldPreProcess(const ziapi::http::Context &ctx,
                                         const ziapi::http::Request &req) const override;
+
+    void Handle(ziapi::http::Context &ctx, const ziapi::http::Request &req, ziapi::http::Response &res) override;
 
     void PostProcess(ziapi::http::Context &ctx, const ziapi::http::Request &req, ziapi::http::Response &res) override;
 

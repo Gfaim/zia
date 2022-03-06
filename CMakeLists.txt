@@ -51,6 +51,7 @@ set(SOURCES
     src/ConfigLoader.cpp
     src/CLI.cpp
     src/RequestManager.cpp
+    src/FileWatcher.cpp
 )
 
 # The list of tests source files

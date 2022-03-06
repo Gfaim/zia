@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "FileWatcher.hpp"
 #include "ModuleLoader.hpp"
 #include "ModulePipeline.hpp"
 #include "Params.hpp"
@@ -22,6 +23,10 @@ private:
 
     void Run();
 
+    void HandleInput();
+
+    void HotReload();
+
     void Restart();
 
     void CleanUp();
@@ -31,13 +36,23 @@ private:
 
     std::vector<std::unique_ptr<ziapi::IModule>> modules_;
 
-    ModulePipeline pipeline_;
+    std::unique_ptr<ModulePipeline> pipeline_;
 
     std::thread pipeline_thread_;
+
+    std::thread input_thread_;
+
+    std::thread hot_reload_thread_;
+
+    std::mutex pipeline_mutex_;
+
+    FileWatcher watcher_;
 
     Params args_;
 
     ziapi::config::Node cfg_;
+
+    std::atomic<bool> should_restart_;
 };
 
 }  // namespace zia
