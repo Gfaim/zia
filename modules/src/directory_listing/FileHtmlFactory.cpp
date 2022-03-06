@@ -3,7 +3,7 @@
 #include <fstream>
 #include <map>
 
-FileHtmlFactory::FileHtmlFactory(const std::filesystem::path &file_path) : m_path(file_path)
+FileHtmlFactory::FileHtmlFactory(const std::filesystem::path& file_path) : m_path(file_path)
 {
     CreateHeader();
     CreateBody();
@@ -68,13 +68,24 @@ void FileHtmlFactory::CreateBody()
     ss << "</html>\n";
 }
 
-std::string FileHtmlFactory::GetFileContent(const std::string &path)
+void FileHtmlFactory::ReplaceAllOccurences(std::string& str, const std::string& from, const std::string& to)
+{
+    size_t start_pos = 0;
+    while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length();
+    }
+}
+
+std::string FileHtmlFactory::GetFileContent(const std::string& path)
 {
     std::string file_content{};
     std::ifstream file_stream(path);
     if (!file_stream.is_open())
         return "";
     std::getline(file_stream, file_content, '\0');
+    ReplaceAllOccurences(file_content, "<", "&lt;");
+    ReplaceAllOccurences(file_content, ">", "&gt;");
     return file_content;
 }
 
