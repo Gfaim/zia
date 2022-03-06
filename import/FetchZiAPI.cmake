@@ -5,7 +5,7 @@ include(FetchContent)
 FetchContent_Declare(
     ziapi
     GIT_REPOSITORY  "https://github.com/martin-olivier/ZiAPI"
-    GIT_TAG         "v5.0.0"
+    GIT_TAG         "v5.0.1"
 )
 
 FetchContent_MakeAvailable(ziapi)
