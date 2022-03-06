@@ -1,12 +1,23 @@
 #include "DirectoryHtmlFactory.hpp"
 
+#include <algorithm>
 #include <map>
+#include <vector>
 
 DirectoryHtmlFactory::DirectoryHtmlFactory(const std::filesystem::path &path) : m_path(path)
 {
     CreateHeader();
     CreateBodyOpening();
-    for (const auto &entry : std::filesystem::directory_iterator(path)) AddElement(entry);
+    for (const auto &entry : std::filesystem::directory_iterator(path)) {
+        if (std::filesystem::is_directory(entry)) {
+            AddElement(entry);
+        }
+    }
+    for (const auto &entry : std::filesystem::directory_iterator(path)) {
+        if (!std::filesystem::is_directory(entry)) {
+            AddElement(entry);
+        }
+    }
     CreateBodyEnding();
 }
 
@@ -24,7 +35,6 @@ void DirectoryHtmlFactory::CreateHeader()
     ss << "    * {\n";
     ss << "        font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, Roboto, 'Segoe UI', Helvetica, "
           "Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';\n";
-    ss << "overflow: scroll;\n";
     ss << "    }\n";
     ss << "</style>\n\n";
 }
@@ -32,7 +42,7 @@ void DirectoryHtmlFactory::CreateHeader()
 void DirectoryHtmlFactory::CreateBodyOpening()
 {
     ss << "<body class=\"flex items-center justify-center w-screen h-screen\">\n";
-    ss << "    <div class=\"w-[720px] h-[480px] bg-gray-100 rounded-xl shadow-xl border border-gray-200 relative "
+    ss << "    <div class=\"bg-gray-100 rounded-xl shadow-xl border border-gray-200 relative "
           "overflow-hidden\">\n";
     ss << "        <div class=\"flex p-2 h-8 items-center absolute\">\n";
     ss << "            <div class=\"h-[14px] w-[14px] rounded-full bg-[#fe6055] border-[1px] border-gray-200 "
@@ -49,7 +59,7 @@ void DirectoryHtmlFactory::CreateBodyOpening()
           "af21153d07a2e92bde7b2ad155055489_low_res_1619092574091.png\">\n";
     ss << "            " << m_path.filename().string() << '\n';
     ss << "        </div>\n";
-    ss << "        <div class=\"bg-white h-full\">\n";
+    ss << "        <div class=\"w-[720px] max-h-[480px] bg-white h-full overflow-y-scroll rounded-b-xl rounde\">\n";
     if (m_path != "" and m_path != "/" and m_path != "./") {
         auto parent_path = m_path.parent_path().string();
         if (!parent_path.empty() and parent_path.front() == '.')
