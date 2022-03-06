@@ -85,16 +85,20 @@ void NotesModule::Handle(ziapi::http::Context &ctx, const ziapi::http::Request &
         res.status_code = ziapi::http::Code::kNotFound;
         return;
     }
-    if (req.method == "GET") {
-        return Get(id, res);
-    } else if (req.method == "DELETE") {
-        return Delete(id, res);
-    } else if (req.method == "POST") {
-        return Post(body.title, body.description, res);
-    } else if (req.method == "PUT") {
-        return Put(id, body.title, body.description, res);
-    } else {
-        res.status_code = ziapi::http::Code::kNotFound;
+    {
+        std::scoped_lock lock(mu_);
+        
+        if (req.method == "GET") {
+            return Get(id, res);
+        } else if (req.method == "DELETE") {
+            return Delete(id, res);
+        } else if (req.method == "POST") {
+            return Post(body.title, body.description, res);
+        } else if (req.method == "PUT") {
+            return Put(id, body.title, body.description, res);
+        } else {
+            res.status_code = ziapi::http::Code::kNotFound;
+        }
     }
 }
 

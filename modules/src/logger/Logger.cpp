@@ -26,9 +26,14 @@ void LoggerModule::Init(const ziapi::config::Node &cfg)
 void LoggerModule::PostProcess(ziapi::http::Context &ctx, const ziapi::http::Request &req, ziapi::http::Response &res)
 {
     auto timestamptz = difftime(std::time(nullptr), std::any_cast<time_t>(ctx["timestamp"]));
-    requests_.push_back(RequestInfos{timestamptz, req, res});
-    while (requests_.size() >= requests_buffer_size_) {
-        requests_.erase(requests_.begin());
+
+    {
+        std::scoped_lock lock(mu_);
+        requests_.push_back(RequestInfos{timestamptz, req, res});
+    
+        while (requests_.size() >= requests_buffer_size_) {
+            requests_.erase(requests_.begin());
+        }
     }
     std::stringstream ss;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ziapi/Module.hpp>
+#include <mutex>
 
 class NotesModule : public ziapi::IHandlerModule {
 private:
@@ -8,6 +9,8 @@ private:
         std::string title;
         std::string description;
     };
+
+    std::mutex mu_{};
 
     std::string folder_;
     std::map<int, Note> notes_;

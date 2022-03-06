@@ -1,4 +1,4 @@
 #!/bin/bash
-for ((i = 0 ; i <= $(($2)) ; i++)); do
-    curl localhost/$1 &
+for ((i = 0 ; i <= $(($1)) ; i++)); do
+    curl https://localhost/ -kvi &
 done

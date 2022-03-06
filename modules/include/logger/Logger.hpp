@@ -1,5 +1,6 @@
 #include <iomanip>
 #include <sstream>
+#include <mutex>
 
 #include "ziapi/Logger.hpp"
 #include "ziapi/Module.hpp"
@@ -13,6 +14,8 @@ private:
         ziapi::http::Request req;
         ziapi::http::Response res;
     };
+
+    std::mutex mu_{};
 
     std::string logs_route_{};
     std::vector<RequestInfos> requests_{};

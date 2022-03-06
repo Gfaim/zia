@@ -1,2 +1,2 @@
 #!/bin/bash
-yes | nc localhost 80
+cat /dev/urandom | nc localhost 443
