@@ -9,10 +9,9 @@ private:
     const std::filesystem::path &m_path;
 
     void CreateHeader();
-    void CreateBodyOpening();
-    void CreateBodyEnding();
+    void CreateBody();
 
-    static std::string GetLanguageName(const std::string &ext);
+    static std::string GetFileContent(const std::string &path);
 
 public:
     FileHtmlFactory(const std::filesystem::path &file_path);

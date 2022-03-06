@@ -3,6 +3,7 @@
 #include <ziapi/Logger.hpp>
 
 #include "DirectoryHtmlFactory.hpp"
+#include "FileHtmlFactory.hpp"
 #include "dylib/dylib.hpp"
 
 void DirectoryListingModule::Init(const ziapi::config::Node &cfg)
@@ -40,12 +41,11 @@ void DirectoryListingModule::Handle(ziapi::http::Context &, const ziapi::http::R
         DirectoryHtmlFactory fac(filepath);
         res.body = fac.GetHtml();
     } else if (std::filesystem::is_regular_file(filepath)) {
-        std::ifstream file_stream(filepath.filename());
-        // ss << file_stream.rdbuf(); TODO
+        FileHtmlFactory fac(filepath);
+        res.body = fac.GetHtml();
     } else {
         res.status_code = ziapi::http::Code::kNotFound;
         res.reason = ziapi::http::reason::kNotFound;
-        return;
     }
 }
 DYLIB_API ziapi::IModule *LoadZiaModule() { return new DirectoryListingModule(); }
