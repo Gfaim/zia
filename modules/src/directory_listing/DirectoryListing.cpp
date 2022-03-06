@@ -28,7 +28,7 @@ void DirectoryListingModule::Init(const ziapi::config::Node &cfg)
 
 bool DirectoryListingModule::IsImage(const std::string &ext)
 {
-    return ext == ".png" or ext == ".jpg" or ext == ".jpeg";
+    return ext == ".png" or ext == ".jpg" or ext == ".jpeg" or ext == ".ico";
 }
 
 void DirectoryListingModule::Handle(ziapi::http::Context &, const ziapi::http::Request &req, ziapi::http::Response &res)
@@ -45,8 +45,10 @@ void DirectoryListingModule::Handle(ziapi::http::Context &, const ziapi::http::R
         DirectoryHtmlFactory fac(filepath);
         res.body = fac.GetHtml();
     } else if (std::filesystem::is_regular_file(filepath)) {
-        if (IsImage(filepath.extension().string())) {
-            res.headers[ziapi::http::header::kContentType] = "image/jpeg";
+        auto extension = filepath.extension().string();
+        if (IsImage(extension)) {
+            res.headers[ziapi::http::header::kContentType] =
+                "image/" + extension == ".ico" ? "image/x-icon" : extension.substr(1);
             res.body = FileHtmlFactory::GetFileContent(filepath.filename().string());
         } else {
             FileHtmlFactory fac(filepath);
